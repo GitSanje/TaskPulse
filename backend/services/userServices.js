@@ -62,7 +62,6 @@ class UserService {
   // Method to check if there exists duplicate email
   async checkEmail(value){
     const isexists = await checkDuplicate('accounts','email',value)
-    console.log(isexists,'from userservice');
     return  isexists
   }
   

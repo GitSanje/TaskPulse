@@ -1,9 +1,11 @@
+import 'dotenv/config'
 import asyncHandler from "express-async-handler";
 import userService from "../services/userServices.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { extractDataFromToken, generateAccessToken } from "../lib/util.js";
+import { extractDataFromToken, generateAccessToken , generateRefreshToken} from "../lib/util.js";
 import cookieOptions from "../config/cookieOptions.js";
+
 
 //asyncHandler -> catches any errors in asynchronous code and passes them to Express's default error handler
 
@@ -41,7 +43,7 @@ const createNewUser = asyncHandler(async (req, res) => {
 
     // check email duplicates
     const existingEmail = await userService.checkEmail(email);
-    console.log(existingEmail, "existingEmail");
+    
 
     if (existingEmail) {
       return res
@@ -89,9 +91,7 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     const user = await userService.findUser("email", email);
-   console.log('====================================');
-   console.log(email,password);
-   console.log('====================================');
+ 
 
     if (!user) {
       return res.status(401).json({status:false, message: "No User found!" });
@@ -105,14 +105,17 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     const accessToken = generateAccessToken(user);
-    //   const refreshToken = generateRefreshToken(user);
+    const refreshToken = generateRefreshToken(user);
 
-  res.cookie("accessToken", accessToken, cookieOptions);
-    //   res.cookie("refreshToken", refreshToken, {
-    //         ...cookieOptions,
-    //         maxAge: 30 * 24 * 60 * 60 * 1000, // Refresh token valid for 30 days
-    //       });
-    return res.status(201).json({
+    res.cookie("accessToken", accessToken, {
+      ...cookieOptions,
+      maxAge: 3 * 60 * 1000, // Access token valid for 3 minutes
+    });
+    res.cookie("refreshToken", refreshToken, {
+            ...cookieOptions,
+            maxAge: 5 * 24 * 60 * 60 * 1000, // Refresh token valid for 5 days
+          });
+     res.status(201).json({
       status: true,
       message: "Login Successfully",
    
@@ -147,12 +150,43 @@ const deleteUser = asyncHandler(async (req, res) => {
 
 
 
+const RefreshToken = asyncHandler(async (req, res) => {
 
+  const refreshToken = req.cookies?.refreshToken; 
+ console.log('====================================');
+ console.log(refreshToken,'refreshtoken');
+ console.log('====================================');
+  
+  if (!refreshToken) return res.status(401).json("You are not authenticated!");
+
+
+  const { userId,username,email, profile_url } = jwt.verify(refreshToken, process.env.JWT_SECRET_KEY);
+   const user = {id: userId,username:username,email:email, profile_url:profile_url}
+
+   const newAccessToken = generateAccessToken(user);
+   const newRefreshToken = generateRefreshToken(user);
+
+
+
+   res.cookie("accessToken", newAccessToken,cookieOptions);
+   res.cookie("refreshToken", newRefreshToken, {
+     ...cookieOptions,
+     maxAge: 5 * 24 * 60 * 60 * 1000, 
+   });
+
+   return res.status(201).json({
+    status: true,
+    message: " Refreshed successfully",
+    
+    
+  });
+  
+});
 
 
 const getUserFromToken = asyncHandler( async(req, res) => {
   const token = req.cookies.accessToken;
-  console.log(token);
+
   if(!token){
     return res.status(401).json({ status: false, error: "Unauthorized,  No Token" });
   }
@@ -165,7 +199,12 @@ const getUserFromToken = asyncHandler( async(req, res) => {
 
   return res.status(200).json({
     status: true,
-    data: userData,
+    data: {
+      id: userData.userId,
+      username: userData.username,
+      email: userData.email,
+      profile_url: userData.profile_url
+    },
   });
 
 })
@@ -178,5 +217,6 @@ export default {
   loginUser,
   logoutUser,
   deleteUser,
-  getUserFromToken
+  getUserFromToken,
+  RefreshToken
 };

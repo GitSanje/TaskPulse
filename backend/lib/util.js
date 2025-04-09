@@ -110,7 +110,7 @@ export const deleteOne = async (tableName, key, value) => {
 export const generateAccessToken = (user) => {
     return jwt.sign({
       userId: user.id,
-      username: user.first_name+'_'+user.last_name,
+      username: user.username? user.username: user.first_name+'_'+user.last_name,
       email: user.email,
       profile_url: user.profile_url || null
     }, process.env.JWT_SECRET_KEY, { expiresIn: '2h' });
@@ -118,13 +118,17 @@ export const generateAccessToken = (user) => {
 
 /**
  * @desc Generates a refresh token for a user
- * @param {string} userId - The ID of the user to generate the token for
+ * @param {Object} user - The user data to generate the token for
  * @returns {string} The generated refresh token (JWT)
  */
-export const generateRefreshToken = (userId) => {
-  return jwt.sign({ userID: userId }, process.env.JWT_SECRET_KEY, {
-    expiresIn: "5d",
-  });
+export const generateRefreshToken = (user) => {
+  return jwt.sign({
+    userId: user.id,
+    username: user.username? user.username: user.first_name+'_'+user.last_name,
+    email: user.email,
+    profile_url: user.profile_url || null
+  }, process.env.JWT_SECRET_KEY, { expiresIn: '5d' });
+  
 };
 
 /**

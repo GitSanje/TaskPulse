@@ -16,11 +16,12 @@ const app = express();
 
 // Middleware Configuration
 const configureMiddleware = () => {
+
+// Use cookie parser middleware to parse cookies
   app.use(cookieParser())
   app.use(cors(corsOptions)); 
   app.use(logger);
   app.use(express.json()); // Parse JSON payloads from incoming requests
-
   app.use(errorHandler);
 };
 

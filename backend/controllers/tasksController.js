@@ -31,7 +31,7 @@ const createNewTask = asyncHandler(async (req, res) => {
   if (!user_id || !title) {
     return res
       .status(400)
-      .json({ message: "Please, provide required fields!" });
+      .json({ error: "Please, provide required fields!" });
   }
   const taskpayload = {
     user_id,
@@ -46,7 +46,7 @@ const createNewTask = asyncHandler(async (req, res) => {
   if (!task) {
     return  res
     .status(400)
-    .json({ status: false, message: "Invalid task data received" });
+    .json({ status: false, error: "Invalid task data received" });
 
     
   } 

@@ -16,5 +16,7 @@ userRouters.delete('/:id', usersController.deleteUser);
 //Route to retreive a user data from the token
 userRouters.get('/me', usersController.getUserFromToken);
 
+//Route to refresh the expire token 
+userRouters.get('/refresh', usersController.RefreshToken);
 
 export default userRouters
