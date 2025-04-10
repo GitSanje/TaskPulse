@@ -120,7 +120,7 @@ type taskEditFrom = taskFormData & {
 
 } 
 
-export const editTask = async (task: taskEditFrom, id:number) => {
+export const editTask = async (task: taskEditFrom | {}, id:number) => {
   try {
     const response = await axiosPrivate.post(`/api/tasks/edit/${id}`, task, {
       withCredentials: true,

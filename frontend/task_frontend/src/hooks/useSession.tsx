@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setUser } from "@/store/sessionSlice";
+import { clearSession, setUser } from "@/store/sessionSlice";
 import { UserPayload } from "@/types";
 import axios from "axios";
 import { useCallback, useEffect } from "react";
@@ -20,8 +20,8 @@ export const useSession = () => {
       });
 
       const data: UserPayload = res.data;
-      dispatch(setUser(data));
-      return data;
+      dispatch(setUser({userData:data}));
+      return { data: data };
     } catch (err) {
       console.error("Failed to fetch user", err);
 
@@ -29,7 +29,7 @@ export const useSession = () => {
         console.error("Axios error response:", err.response?.data.error);
       }
 
-      dispatch(setUser(null));
+      dispatch(clearSession());
       return null;
     }
   }, [dispatch]);
@@ -39,7 +39,8 @@ export const useSession = () => {
       fetchSession();
     }
   }, [fetchSession, initialized]);
-  return { user, loading, fetchSession };
+  const session = { data: user}
+  return {session , loading, fetchSession };
 };
 
 // Add a logout function that can be used anywhere in the app
@@ -56,7 +57,7 @@ export const useLogout = () => {
       if (res.data) {
         setTimeout(() => {
           // Clear the user from Redux
-          dispatch(setUser(null));
+          dispatch(clearSession());
           toast.success("Logged out successfully!");
           navigate("/");
         }, 2000);

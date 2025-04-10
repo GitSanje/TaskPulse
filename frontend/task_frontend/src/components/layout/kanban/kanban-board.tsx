@@ -22,21 +22,21 @@ import { editTask } from "@/actions/task";
 export default function KanbanBoard() {
   const dispatch = useAppDispatch();
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const { user } = useSession();
+  const { session } = useSession();
   useAxiosPrivate();
   const toogleObj = useAppSelector((state) => state.toogle.toggles);
   const isFormOpen = toogleObj["taskform"] ?? false;
 
   const tasks = useAppSelector((state) => state.tasks.tasks);
   const loading = useAppSelector((state) => state.tasks.loading);
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   useEffect(() => {
-    if (user?.data) {
-       dispatch(fetchUserTasks(user?.data.userId));
+    if (session?.data) {
+       dispatch(fetchUserTasks(session?.data.userId!));
     
     }
-  }, [user, dispatch]);
+  }, [session, dispatch]);
 
   const handleDrop = (taskId: number, newStatus: TaskStatus, currentStatus: TaskStatus) => {
 

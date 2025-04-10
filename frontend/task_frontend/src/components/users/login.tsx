@@ -1,7 +1,5 @@
 "use client";
 
-// ───── React & State ─────
-import type React from "react";
 import { useState, useTransition } from "react";
 
 // ───── Icons ─────

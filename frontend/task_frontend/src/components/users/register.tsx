@@ -3,8 +3,7 @@
 // handle form 
 import { useForm } from "react-hook-form";
 import { useState, useTransition } from "react";
-// zod for validation
-import { z } from "zod";
+// zod for validatio
 import { zodResolver } from "@hookform/resolvers/zod";
 
 // zod schemas

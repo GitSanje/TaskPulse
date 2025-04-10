@@ -59,7 +59,7 @@ import { useSession } from "@/hooks/useSession";
 import { toggle } from "@/store/toogleSlice";
 
 export default function TaskForm({  initialData }: TaskFormProps) {
-  const { user } = useSession();
+  const { session } = useSession();
   useAxiosPrivate(); // Initialize axios private instance
   const [isPending, startTransition] = useTransition();
   const dispatch = useAppDispatch();
@@ -69,7 +69,8 @@ export default function TaskForm({  initialData }: TaskFormProps) {
 
   useEffect (() => {
     if(initialData){
-      dispatch(setFormData({task:initialData, isEdit:true}))
+      const editedData = {...initialData, due_date: new Date(initialData.due_date!) }
+      dispatch(setFormData({task:editedData, isEdit:true}))
     }
   },[])
   // Determine which data to use as default values
@@ -77,11 +78,11 @@ export default function TaskForm({  initialData }: TaskFormProps) {
     isDirty 
       ? {
           ...persistedFormData,
-          user_id: user?.data.userId,
+        
           due_date: new Date(persistedFormData.due_date!),
         }
       : {
-          user_id: user?.data.userId,
+        
           title: initialData?.title || "",
           description: initialData?.description || "",
           status: initialData?.status || "pending",
@@ -120,7 +121,7 @@ export default function TaskForm({  initialData }: TaskFormProps) {
       try {
 
         
-        const finalData = { ...data, user_id: user?.data.userId as number };
+        const finalData = { ...data, user_id: session.data?.userId as number };
           // Call addtask server function
 
           let result;
@@ -139,7 +140,7 @@ export default function TaskForm({  initialData }: TaskFormProps) {
               // Reset the form in Redux after successful submission
               dispatch(resetForm());
               dispatch(invalidateCache())
-              dispatch(fetchUserTasks(user?.data.userId));
+              dispatch(fetchUserTasks(session.data?.userId!));
               handleCancel();
             }, 2000);
           } else {
@@ -246,7 +247,7 @@ export default function TaskForm({  initialData }: TaskFormProps) {
                     onValueChange={(value) => {
                       field.onChange(value);
                       if (!initialData) {
-                        dispatch(updateFormField({ field: "priority", value }));
+                        dispatch(updateFormField({ field: "priority", value  }));
                       }
                     }}
                   >
@@ -319,7 +320,7 @@ export default function TaskForm({  initialData }: TaskFormProps) {
           <Button
             type="submit"
             className="bg-black text-white hover:bg-gray-800 "
-            disabled={!user?.data.userId || isPending}
+            disabled={!session.data?.userId! || isPending}
           >
             {isPending ? (
               <Loader

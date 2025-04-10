@@ -53,7 +53,7 @@ export type SignupFormData = z.infer<typeof signupSchema>;
 
 
 export interface UserPayload {
-  userId: string;
+  userId: number | undefined;
   email: string;
   username: string;
   profile_url?: string;

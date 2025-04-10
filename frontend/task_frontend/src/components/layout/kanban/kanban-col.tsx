@@ -18,7 +18,7 @@ export default function KanbanColumn({
   const [isPending, startTransition] = useTransition();
   const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
   const dispatch = useAppDispatch();
-  const { user } = useSession();
+  const { session } = useSession();
   const handleDeleteTask = async (taskId: number) => {
     setDeletingTaskId(taskId); // show spinner for this card
 
@@ -29,7 +29,7 @@ export default function KanbanColumn({
           toast.success(result.message);
           setTimeout(() => {
             dispatch(invalidateCache());
-            dispatch(fetchUserTasks(user?.data.userId));
+            dispatch(fetchUserTasks(session.data?.userId!));
           }, 1000);
         } else {
           toast.error(result?.message);
@@ -73,7 +73,7 @@ export default function KanbanColumn({
 
   return (
     <div
-      ref={drop}
+      ref={drop as unknown as React.RefObject<HTMLDivElement>}
       className={`rounded-lg p-4 ${getColumnColor()} ${
         isOver ? "ring-2 ring-primary ring-opacity-50" : ""
       } transition-all`}

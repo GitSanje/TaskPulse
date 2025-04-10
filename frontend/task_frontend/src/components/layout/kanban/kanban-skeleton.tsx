@@ -3,11 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 export default function KanbanBoardSkeleton() {
   // Create an array of columns
   const columns = ["pending", "in_progress", "completed"]
-  const columnTitles = {
-    pending: "To Do",
-    in_progress: "In Progress",
-    completed: "Completed",
-  }
+
 
   return (
     <div>

@@ -83,7 +83,7 @@ export default function TaskCard({
   return (
     <>
       <Card
-        ref={drag}
+        ref={drag as unknown as React.RefObject<HTMLDivElement>}
         className={`cursor-grab relative  ${
           isDragging ? "opacity-50" : "opacity-100"
         } transition-opacity`}
@@ -149,7 +149,7 @@ export default function TaskCard({
             <Clock className="h-3 w-3 mr-1" />
             <span>
               Created{" "}
-              {formatDistanceToNow(new Date(task.created_at), {
+              {formatDistanceToNow(new Date(task.created_at!), {
                 addSuffix: true,
               })}
             </span>
