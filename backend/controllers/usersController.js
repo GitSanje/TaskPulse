@@ -128,8 +128,17 @@ const loginUser = asyncHandler(async (req, res) => {
  * @access Private
  */
 const logoutUser = (req, res) => {
-  res.clearCookie("accessToken");
-  res.clearCookie("refreshToken");
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: true,        
+    sameSite: "None",    
+  });
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+  });
+  
   return res.status(201).json({ status:true, message: "Logged out successfully!" });
 };
 
