@@ -1,4 +1,5 @@
-import { useAppSelector } from "@/store/hooks"
+import useGloabalContext from "@/hooks/globalContextProvider"
+
 import type React from "react"
 import { Navigate } from "react-router-dom"
 
@@ -8,12 +9,11 @@ interface PrivateRouteProps {
 }
 
 export default function PrivateRoute({ children }: PrivateRouteProps) {
-  const user = useAppSelector((state) => state.session.user)
-//   const location = useLocation()
-
+  const { session } = useGloabalContext()
+  
   //state={{ from: location }} replace
   
-  if (!user) {
+  if (!session) {
     // Redirect to login page but save the location they were trying to access
     return <Navigate to="/login"  />
   }

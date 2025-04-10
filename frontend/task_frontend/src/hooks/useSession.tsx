@@ -1,6 +1,5 @@
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { clearSession, setUser } from "@/store/sessionSlice";
-
 import axios from "axios";
 import { useCallback, useEffect } from "react";
 import { axiosPrivate } from "./axios";
