@@ -73,6 +73,24 @@ const getATask = asyncHandler(async (req, res) => {
 
 });
 
+/**
+ * @desc Get all tasks for a specific user
+ * @route GET /api/tasks/user/id
+ * @access Private
+ */
+const getUserTasks = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  
+  const tasks = await taskServices.findTasksByUserId(id);
+
+  if (!tasks || tasks.length === 0) {
+    return res.status(404).json({ status: false, message: "No tasks found for this user." });
+  }
+
+  return res.status(200).json({ status: true, data: tasks });
+});
+
 
 
 /**
@@ -87,4 +105,4 @@ const deleteTask = asyncHandler(async (req, res) => {
 });
 
 
-export default { createNewTask, getAllTasks, deleteTask,getATask };
+export default { createNewTask, getAllTasks, deleteTask,getATask,getUserTasks };

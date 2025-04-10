@@ -16,11 +16,11 @@ interface Props {
 export const GlobalProvider: React.FC<Props> = (props) => {
   const { children } = props;
 
-  const session = useSession();
-  const user = session?.user || null;
+  const {user} = useSession();
+  const session = user || null;
 
   return (
-    <globalContext.Provider value={{ session: user }}>
+    <globalContext.Provider value={{ session: session }}>
       {children}
     </globalContext.Provider>
   );

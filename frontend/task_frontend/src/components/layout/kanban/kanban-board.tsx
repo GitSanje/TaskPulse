@@ -1,130 +1,87 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { DndProvider } from "react-dnd"
-import { HTML5Backend } from "react-dnd-html5-backend"
+import { useState, useEffect } from "react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
-
-import { Button } from "@/components/ui/button"
-import { PlusCircle } from "lucide-react"
-import type { Task, TaskStatus } from "@/types"
-import TaskForm from "@/components/tasks/task-form"
-import KanbanColumn from "./kanban-col"
-import useGloabalContext from "@/hooks/globalContextProvider"
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
+import type { Task, TaskStatus } from "@/types";
+import TaskForm from "@/components/tasks/task-form";
+import KanbanColumn from "./kanban-col";
+import useGloabalContext from "@/hooks/globalContextProvider";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { toggle } from "@/store/toogleSlice";
+import { fetchUserTasks } from "@/store/taskSlice";
+import KanbanBoardSkeleton from "./kanban-skeleton";
+import LoadingSpinner from "@/components/ui/loading-spinner";
+import useAxiosPrivate from "@/hooks/useAxiosPrivate";
+import { deleteTask } from "@/actions/task";
+import { toast } from "sonner";
 
 export default function KanbanBoard() {
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [isFormOpen, setIsFormOpen] = useState(false)
-  const [editingTask, setEditingTask] = useState<Task | null>(null)
-   const {session}= useGloabalContext();
-   
-      console.log('====================================');
-      console.log(" dashboard session",session);
-      console.log('====================================');
+  const dispatch = useAppDispatch();
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const { session } = useGloabalContext();
+  useAxiosPrivate();
+  const toogleObj = useAppSelector((state) => state.toogle.toggles);
+  const isFormOpen = toogleObj["taskform"] ?? false;
+
+  const tasks = useAppSelector((state) => state.tasks.tasks);
+  const loading = useAppSelector((state) => state.tasks.loading);
+
   // In a real app, you would fetch tasks from your API
   useEffect(() => {
-    // Mock data based on the schema
-    const mockTasks: Task[] = [
-      {
-        id: 1,
-        user_id: 1,
-        title: "Create wireframes for dashboard",
-        description: "Design initial wireframes for the new admin dashboard",
-        status: "pending",
-        priority: "high",
-        due_date: new Date(Date.now() + 86400000 * 3).toISOString(), // 3 days from now
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      {
-        id: 2,
-        user_id: 1,
-        title: "Implement authentication",
-        description: "Set up JWT authentication for the API",
-        status: "in_progress",
-        priority: "high",
-        due_date: new Date(Date.now() + 86400000 * 2).toISOString(), // 2 days from now
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      {
-        id: 3,
-        user_id: 1,
-        title: "Write API documentation",
-        description: "Document all API endpoints using Swagger",
-        status: "in_progress",
-        priority: "medium",
-        due_date: new Date(Date.now() + 86400000 * 5).toISOString(), // 5 days from now
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      {
-        id: 4,
-        user_id: 1,
-        title: "Fix navigation bug",
-        description: "Address the navigation issue on mobile devices",
-        status: "completed",
-        priority: "medium",
-        due_date: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      {
-        id: 5,
-        user_id: 1,
-        title: "Review pull requests",
-        description: "Review and merge pending pull requests",
-        status: "pending",
-        priority: "low",
-        due_date: new Date(Date.now() + 86400000).toISOString(), // 1 day from now
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-    ]
-
-    setTasks(mockTasks)
-  }, [])
+    if (session?.data) {
+      dispatch(fetchUserTasks(session?.data.id));
+    }
+  }, [session, dispatch]);
 
   const handleDrop = (taskId: number, newStatus: TaskStatus) => {
-    setTasks(tasks.map((task) => (task.id === taskId ? { ...task, status: newStatus } : task)))
-  }
-
-  const handleAddTask = (task: Omit<Task, "id" | "created_at" | "updated_at">) => {
-    const newTask: Task = {
-      ...task,
-      id: Math.max(0, ...tasks.map((t) => t.id)) + 1,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-
-    setTasks([...tasks, newTask])
-    setIsFormOpen(false)
-  }
+    // setTasks(tasks.map((task) => (task.id === taskId ? { ...task, status: newStatus } : task)))
+  };
 
   const handleEditTask = (updatedTask: Task) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === updatedTask.id ? { ...updatedTask, updated_at: new Date().toISOString() } : task,
-      ),
-    )
-    setEditingTask(null)
-    setIsFormOpen(false)
-  }
+    // setTasks(
+    //   tasks.map((task) =>
+    //     task.id === updatedTask.id ? { ...updatedTask, updated_at: new Date().toISOString() } : task,
+    //   ),
+    //)
+    setEditingTask(null);
+    dispatch(toggle("taskform"));
+  };
 
-  const handleDeleteTask = (taskId: number) => {
-    setTasks(tasks.filter((task) => task.id !== taskId))
-  }
+
 
   const openEditForm = (task: Task) => {
-    setEditingTask(task)
-    setIsFormOpen(true)
-  }
+    setEditingTask(task);
+    dispatch(toggle("taskform"));
+  };
 
-  const columns: TaskStatus[] = ["pending", "in_progress", "completed"]
+  const columns: TaskStatus[] = ["pending", "in_progress", "completed"];
   const columnTitles = {
     pending: "To Do",
     in_progress: "In Progress",
     completed: "Completed",
+  };
+
+  // Show skeleton loader when loading
+  if (loading) {
+    return (
+      <div className="relative">
+        <div className="opacity-60">
+          <KanbanBoardSkeleton />
+        </div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="bg-white/80 rounded-lg p-6 shadow-lg flex flex-col items-center">
+            <LoadingSpinner size={8} className="text-primary" />
+            <p className="mt-2 text-sm font-medium text-gray-700">
+              Loading your tasks...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -133,8 +90,8 @@ export default function KanbanBoard() {
         <h2 className="text-xl font-semibold">My Tasks</h2>
         <Button
           onClick={() => {
-            setEditingTask(null)
-            setIsFormOpen(true)
+            setEditingTask(null);
+            dispatch(toggle("taskform"));
           }}
           className="flex items-center gap-1 bg-black text-white hover:bg-gray-800"
         >
@@ -145,10 +102,8 @@ export default function KanbanBoard() {
 
       {isFormOpen && (
         <TaskForm
-          onSubmit={editingTask ? handleEditTask : handleAddTask}
           onCancel={() => {
-            setIsFormOpen(false)
-            setEditingTask(null)
+            dispatch(toggle("taskform"));
           }}
           initialData={editingTask}
         />
@@ -160,13 +115,13 @@ export default function KanbanBoard() {
             key={status}
             status={status}
             title={columnTitles[status]}
-            tasks={tasks.filter((task) => task.status === status)}
+            tasks={tasks?.filter((task) => task.status === status) || []}
             onDrop={handleDrop}
             onEdit={openEditForm}
-            onDelete={handleDeleteTask}
+          
           />
         ))}
       </div>
     </DndProvider>
-  )
+  );
 }

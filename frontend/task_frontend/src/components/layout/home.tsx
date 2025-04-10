@@ -1,15 +1,15 @@
 
 import { Button } from "@/components/ui/button"
 import { ArrowRight, CheckCircle2, DropletsIcon as DragDropIcon, ListTodo, MoveHorizontal } from "lucide-react"
-import Footer from "./footer"
+
 import { Link } from "react-router-dom"
-import Navbar from "./navbar"
+
 
 
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
-      <Navbar />
+
 
       <main className="flex-1">
         {/* Hero Section */}
@@ -130,7 +130,7 @@ export default function Home() {
         </section>
       </main>
 
-      <Footer />
+
     </div>
   )
 }

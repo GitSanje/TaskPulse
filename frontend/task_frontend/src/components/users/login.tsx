@@ -35,6 +35,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "@/actions/user";
 import { SignInFormData } from "@/types";
 import { signInSchema } from "@/schemas";
+import { useSession } from "@/hooks/useSession";
 
 
 
@@ -54,7 +55,7 @@ export default function LoginPage() {
   } = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema), // Integrate Zod validation
   });
-
+  useSession()
    // function to handlle form submission
     const onSubmit = async (data: SignInFormData) => {
       startTransition(async () => {
@@ -64,7 +65,9 @@ export default function LoginPage() {
           if (result?.success) {
             // If successful
             toast.success("You can now surf the TaskPlus");
+
             setTimeout(() => {
+          
               navigate("/dashboard");
             }, 2000);
           }

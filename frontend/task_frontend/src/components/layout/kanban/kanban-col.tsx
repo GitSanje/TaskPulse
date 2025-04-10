@@ -1,6 +1,11 @@
+import { deleteTask } from "@/actions/task";
 import TaskCard from "@/components/tasks/task-card";
+import { useAppDispatch } from "@/store/hooks";
+import { fetchUserTasks } from "@/store/taskSlice";
 import { KanbanColumnProps } from "@/types";
+import { useState, useTransition } from "react";
 import { useDrop } from "react-dnd";
+import { toast } from "sonner";
 
 export default function KanbanColumn({
   status,
@@ -8,8 +13,35 @@ export default function KanbanColumn({
   tasks,
   onDrop,
   onEdit,
-  onDelete,
+
 }: KanbanColumnProps) {
+  const [isPending, startTransition] = useTransition();
+  const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
+    const dispatch = useAppDispatch();
+
+    const handleDeleteTask = async (taskId: number) => {
+      setDeletingTaskId(taskId); // show spinner for this card
+    
+      startTransition(async () => {
+        try {
+          const result = await deleteTask(taskId);
+          if (result?.success) {
+            toast.success(result.message);
+            setTimeout(() => {
+              dispatch(fetchUserTasks(session?.user.id)); // or session.data.id if using next-auth
+            }, 1000);
+          } else {
+            toast.error(result?.message);
+          }
+        } catch (error) {
+          console.error(error);
+          toast.error("Error deleting task");
+        } finally {
+          setDeletingTaskId(null); // reset spinner
+        }
+      });
+    };
+    
   //When you call useDrop, it registers your component as a drop target with the Dnd backend
   const [{ isOver }, drop] = useDrop({
     //What types of draggable items this target can accept.
@@ -48,21 +80,22 @@ export default function KanbanColumn({
       <h3 className="font-medium text-lg mb-4">
         {title}{" "}
         <span className="text-muted-foreground ml-1 text-sm">
-          ({tasks.length})
+          ({tasks?.length})
         </span>
       </h3>
 
       <div className="space-y-3 min-h-[200px]">
-        {tasks.map((task) => (
+        {tasks?.map((task) => (
           <TaskCard
             key={task.id}
             task={task}
+            isDeleting={deletingTaskId === task.id && isPending}
             onEdit={() => onEdit(task)}
-            onDelete={() => onDelete(task.id)}
+            onDelete={() => handleDeleteTask(task.id)}
           />
         ))}
 
-        {tasks.length === 0 && (
+        {tasks?.length === 0 && (
           <div className="h-24 flex items-center justify-center border border-dashed rounded-lg">
             <p className="text-muted-foreground text-sm">No tasks</p>
           </div>

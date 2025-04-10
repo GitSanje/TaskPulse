@@ -14,13 +14,9 @@ export const useSession = () => {
       const fetchUser = async () => {
         try {
           const res = await axios.get("http://localhost:3500/api/users/me", {
-            withCredentials: true, // to include cookies
+            withCredentials: true// to include cookies
           });
-      
-          console.log("====================================");
-          console.log(res);
-          console.log("====================================");
-      
+
           // If successful, res.data will contain the user info
           const data: UserPayload = res.data;
           dispatch(setUser(data));
@@ -38,7 +34,7 @@ export const useSession = () => {
       fetchUser()
     }
   }, [dispatch, initialized])      
-    
+ 
     return { user, loading };
 
 }
@@ -50,7 +46,7 @@ export const useLogout = () => {
   const logout = async () => {
     try {
       // Call your logout API endpoint
-      const res = await fetch("http://localhost:3500/api/auth/logout", {
+      const res = await fetch("http://localhost:3500/api/users/logout", {
         method: "POST",
         credentials: "include",
       })

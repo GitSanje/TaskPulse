@@ -147,3 +147,52 @@ export const extractDataFromToken = (token) => {
     return null;
   }
 };
+
+/**
+ * @desc Fetches all items belonging to a specific attribute( e.g, user)
+ * @param {string} tableName - The name of the table to delete from
+ * @param {string} key - The column name to filter by (e.g., 'id', 'email')
+ * @param {any} value - The value to match for the key
+ * @returns {Promise<Array>} - List of items 
+ */
+
+
+export const findItemsBy = async (tableName, key, value, excludedFields = []) => {
+  try {
+    let selectedCols = '*';
+
+    if (excludedFields.length > 0) {
+      selectedCols = await getSelectableColumns(tableName, excludedFields);
+    }
+
+    const query = format(
+      `SELECT ${selectedCols} FROM %I WHERE %I = $1 ORDER BY created_at DESC`,
+      tableName,
+      key
+    );
+
+    const result = await pool.query(query, [value]);
+    return result.rows;
+  } catch (err) {
+    console.error('Error in findTasksByUser:', err);
+    throw new Error('Unable to fetch tasks for the user.');
+  }
+};
+
+
+
+
+export const update= async (tableName,key, value, updatedData) => {
+  const fields = Object.keys(updatedData);
+  const values = Object.values(updatedData);
+
+  const setClause = fields.map((field, index) => format('%I = $%s', field, index + 1)).join(', ');
+
+  const query = format(
+    `UPDATE %I SET ${setClause} WHERE %I = $1 RETURNING *`,tableName,key
+  );
+
+  const result = await pool.query(query, [...values, taskId]);
+
+  return result.rowCount > 0 ? result.rows[0] : null;
+};

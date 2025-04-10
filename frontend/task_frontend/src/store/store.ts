@@ -4,6 +4,14 @@ import storage from "redux-persist/lib/storage" // defaults to localStorage
 import { combineReducers } from "redux"
 import formReducer from "./formSlice"
 import sessionReducer from "./sessionSlice"
+import toogleReducer from "./toogleSlice"
+import taskReducer from "./taskSlice";
+
+const taskPersistConfig = {
+  key: "tasks",
+  storage,
+  whitelist: ["tasks"] 
+};
 
 
 // Persist configuration for form data
@@ -17,12 +25,24 @@ const formPersistConfig = {
 const sessionPersistConfig = {
   key: "session",
   storage,
-  whitelist: ["user", "initialized"], // Don't persist loading state
+  whitelist: ["user", "initialized"],
 }
 
+// Persist configuration for toogle data
+const tooglePersistConfig = {
+  key: "toggle",
+  storage,
+  whitelist: ["toggles"]
+}
+
+
+
+//represents the root reducer, which combines all the individual reducers in the application.
   const rootReducer = combineReducers({
     form: persistReducer(formPersistConfig, formReducer),
     session: persistReducer(sessionPersistConfig, sessionReducer),
+    toogle: persistReducer(tooglePersistConfig, toogleReducer),
+    tasks: persistReducer(taskPersistConfig, taskReducer),
   })
 
 
@@ -47,3 +67,4 @@ export const persistor = persistStore(store)
 
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
+

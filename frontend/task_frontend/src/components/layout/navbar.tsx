@@ -1,13 +1,49 @@
 "use client"
 
 import { useState } from "react"
-
+import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { Menu, X } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Menu, User, X } from "lucide-react"
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useAppDispatch, useAppSelector } from "@/store/hooks"
+import { setUser } from "@/store/sessionSlice"
+import { toast } from "sonner"
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const user = useAppSelector((state) => state.session.user)
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    try {
+      // Call your logout API endpoint
+      const res = await fetch("http://localhost:3500/api/users/logout", {
+        method: "POST",
+        credentials: "include",
+      })
+
+      if (res.ok) {
+    
+        setTimeout(() => {
+              // Clear the user from Redux
+        dispatch(setUser(null))
+          toast.success("logging out")
+          navigate("/")
+        },2000)
+     
+      }
+    } catch (err) {
+      console.error("Logout failed", err)
+    }
+  }
 
   return (
     <header className="w-full border-b bg-white">
@@ -31,12 +67,34 @@ export default function Navbar() {
           </Link>
         </nav>
         <div className="ml-auto md:ml-4 flex gap-2">
-          <Button asChild variant="outline" className="hidden md:flex">
-            <Link to="/login">Log In</Link>
-          </Button>
-          <Button asChild className="hidden md:flex bg-black text-white hover:bg-gray-800">
-            <Link to="/signup">Sign Up</Link>
-          </Button>
+          {user ? (
+            <div className="hidden md:flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    <span>{user.username}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => navigate("/dashboard")}>Dashboard</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/profile")}>Profile</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/settings")}>Settings</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ) : (
+            <>
+              <Button asChild variant="outline" className="hidden md:flex">
+                <Link to="/login">Log In</Link>
+              </Button>
+              <Button asChild className="hidden md:flex bg-black text-white hover:bg-gray-800">
+                <Link to="/signup">Sign Up</Link>
+              </Button>
+            </>
+          )}
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
@@ -73,18 +131,49 @@ export default function Navbar() {
             >
               Contact
             </Link>
-            <div className="flex gap-2 mt-2">
-              <Button asChild variant="outline" className="w-full">
-                <Link to="/login" onClick={() => setIsMenuOpen(false)}>
-                  Log In
-                </Link>
-              </Button>
-              <Button asChild className="w-full bg-black text-white hover:bg-gray-800">
-                <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
-                  Sign Up
-                </Link>
-              </Button>
-            </div>
+
+            {user ? (
+              <div className="mt-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <User className="h-4 w-4" />
+                  <span className="font-medium">{user.username}</span>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Link to="/dashboard" className="text-sm hover:underline" onClick={() => setIsMenuOpen(false)}>
+                    Dashboard
+                  </Link>
+                  <Link to="/profile" className="text-sm hover:underline" onClick={() => setIsMenuOpen(false)}>
+                    Profile
+                  </Link>
+                  <Link to="/settings" className="text-sm hover:underline" onClick={() => setIsMenuOpen(false)}>
+                    Settings
+                  </Link>
+                  <Button
+                    variant="outline"
+                    className="mt-2"
+                    onClick={() => {
+                      handleLogout()
+                      setIsMenuOpen(false)
+                    }}
+                  >
+                    Logout
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex gap-2 mt-2">
+                <Button asChild variant="outline" className="w-full">
+                  <Link to="/login" onClick={() => setIsMenuOpen(false)}>
+                    Log In
+                  </Link>
+                </Button>
+                <Button asChild className="w-full bg-black text-white hover:bg-gray-800">
+                  <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
+                    Sign Up
+                  </Link>
+                </Button>
+              </div>
+            )}
           </nav>
         </div>
       )}
@@ -92,7 +181,7 @@ export default function Navbar() {
   )
 }
 
-function ListTodoIcon(props) {
+function ListTodoIcon(props:any) {
   return (
     <svg
       {...props}

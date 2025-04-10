@@ -108,8 +108,8 @@ const loginUser = asyncHandler(async (req, res) => {
     const refreshToken = generateRefreshToken(user);
 
     res.cookie("accessToken", accessToken, {
-      ...cookieOptions,
-      maxAge: 3 * 60 * 1000, // Access token valid for 3 minutes
+      ...cookieOptions
+      
     });
     res.cookie("refreshToken", refreshToken, {
             ...cookieOptions,
@@ -129,6 +129,7 @@ const loginUser = asyncHandler(async (req, res) => {
  */
 const logoutUser = (req, res) => {
   res.clearCookie("accessToken");
+  res.clearCookie("refreshToken");
   return res.status(200).json({ message: "Logged out successfully" });
 };
 
@@ -153,9 +154,7 @@ const deleteUser = asyncHandler(async (req, res) => {
 const RefreshToken = asyncHandler(async (req, res) => {
 
   const refreshToken = req.cookies?.refreshToken; 
- console.log('====================================');
- console.log(refreshToken,'refreshtoken');
- console.log('====================================');
+
   
   if (!refreshToken) return res.status(401).json("You are not authenticated!");
 

@@ -1,6 +1,6 @@
 
 import pool from "../config/db.js"
-import { deleteOne, findOne } from "../lib/util.js";
+import { deleteOne, findOne,findItemsBy } from "../lib/util.js";
 
 
 
@@ -70,6 +70,16 @@ async createTask(taskObj) {
   }
 
   /**
+ * @desc Finds all tasks belonging to a user
+ * @param {string} userId
+ * @returns {Promise<Array>} List of tasks
+ */
+async findTasksByUserId(userId) {
+  return await findItemsBy("tasks", "user_id", userId); 
+}
+
+
+  /**
    * @desc Deletes a task in the 'tasks' table 
    * @param {string} key - The column name to search by (e.g., 'id', 'email')
    * @param {any} value - The value to match against the specified key
@@ -80,6 +90,9 @@ async createTask(taskObj) {
     const isDelete = await deleteOne('tasks', key, value);
     return isDelete;
   }
+
+
+  
   
 
 }

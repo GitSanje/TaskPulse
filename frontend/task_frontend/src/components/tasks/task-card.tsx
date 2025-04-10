@@ -58,7 +58,7 @@ export default function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
     >
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-2">
-          <h4 className="font-medium text-sm">{task.title}</h4>
+          <h4 className="font-medium text-sm uppercase">{task.title}</h4>
           <DropdownMenu>
             <DropdownMenuTrigger className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-muted">
               <MoreVertical className="h-4 w-4" />
@@ -80,7 +80,7 @@ export default function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
         </div>
 
         {task.description && (
-          <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+          <p className=" text-start text-muted-foreground text-sm mb-3 line-clamp-2 ">
             {task.description}
           </p>
         )}

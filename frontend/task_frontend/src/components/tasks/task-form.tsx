@@ -1,64 +1,82 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
 // ───── React & State ─────
-import { useTransition } from "react"
+import { useTransition } from "react";
 
 // ───── Form Handling ─────
-import { Controller, useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { Controller, SubmitErrorHandler, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 // ───── Redux ─────
-import { useAppDispatch, useAppSelector } from "@/store/hooks"
-import { resetForm, updateFormField } from "@/store/formSlice"
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { resetForm, updateFormField } from "@/store/formSlice";
 
 // ───── Shadcn UI Components ─────
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar } from "@/components/ui/calendar"
-import { Label } from "@/components/ui/label"
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Label } from "@/components/ui/label";
 
 // ───── Icons ─────
-import { CalendarIcon, X } from "lucide-react"
+import { CalendarIcon, Loader, X } from "lucide-react";
 
 // ───── Utils & Helpers ─────
-import { cn } from "@/lib/utils"
-import { format } from "date-fns"
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 // ───── Types & Schemas ─────
-import { taskSchema } from "@/schemas"
-import type { taskFormData, TaskFormProps } from "@/types"
-import useGloabalContext from "@/hooks/globalContextProvider"
+import { taskSchema } from "@/schemas";
+import type { taskFormData, TaskFormProps } from "@/types";
+import useGloabalContext from "@/hooks/globalContextProvider";
+import { addTask } from "@/actions/task";
+import { toast } from "sonner";
+import { data } from "react-router-dom";
+import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 
-export default function TaskForm({ onSubmit, onCancel, initialData }: TaskFormProps) {
-
-
-   const {session}= useGloabalContext();
-
-   console.log('====================================');
-   console.log("session",session);
-   console.log('====================================');
-  const [isPending, startTransition] = useTransition()
-  const dispatch = useAppDispatch()
-  const persistedFormData = useAppSelector((state) => state.form.formData)
-  const isDirty = useAppSelector((state) => state.form.isDirty)
+export default function TaskForm({ onCancel, initialData }: TaskFormProps) {
+  const { session } = useGloabalContext();
+  useAxiosPrivate() // Initialize axios private instance
+  const [isPending, startTransition] = useTransition();
+  const dispatch = useAppDispatch();
+  const persistedFormData = useAppSelector((state) => state.form.formData);
+  const isDirty = useAppSelector((state) => state.form.isDirty);
 
   // Determine which data to use as default values
   const defaultValues =
     isDirty && !initialData
-      ? persistedFormData
-      : {
+      ? {...persistedFormData, user_id: session.data.id, due_date: new Date(persistedFormData.due_date!)}
+      : { 
+          user_id: session.data.id,
           title: initialData?.title || "",
           description: initialData?.description || "",
           status: initialData?.status || "pending",
           priority: initialData?.priority || "medium",
-          due_date: initialData?.due_date ? new Date(initialData.due_date) : undefined,
-        }
+          due_date: initialData?.due_date
+            ? new Date(initialData.due_date)
+            : undefined,
+        };
 
   const {
     register,
@@ -68,39 +86,56 @@ export default function TaskForm({ onSubmit, onCancel, initialData }: TaskFormPr
   } = useForm<taskFormData>({
     resolver: zodResolver(taskSchema),
     defaultValues,
-  })
+  });
 
   // Instead of watching all form values, we'll update Redux on individual field changes
   const registerWithPersist = (name: keyof taskFormData) => {
     return {
       ...register(name),
-      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      onChange: (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      ) => {
         if (!initialData) {
-          dispatch(updateFormField({ field: name, value: e.target.value }))
+          dispatch(updateFormField({ field: name, value: e.target.value }));
         }
       },
-    }
-  }
+    };
+  };
 
   const onFormSubmit = (data: taskFormData) => {
-    const task = {
-      ...(initialData ? { id: initialData.id } : {}),
-      user_id: initialData?.user_id || 1,
-      ...data,
-      due_date: data.due_date?.toISOString(),
-      ...(initialData ? { created_at: initialData.created_at } : {}),
-    }
-
-    onSubmit(task)
-
-    // Reset the form in Redux after successful submission
-    dispatch(resetForm())
-  }
+   
+    startTransition(async () => {
+      try {
+     
+        const finalData = {...data, user_id:session.data.id as number}
+        // Call addtask server function
+        const result = await addTask(finalData);
+        if (result?.success) {
+          // If successful
+          toast.success(result.message);
+          setTimeout(() => {
+            // Reset the form in Redux after successful submission
+            dispatch(resetForm());
+            handleCancel();
+          }, 2000);
+        } else {
+         
+          
+          toast.error(result?.message );
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error("Error creating account");
+      }
+    });
+  };
+  
+  // uncomment and put (onError) on handleSubmit to inspect the errors 
+  // const onError: SubmitErrorHandler<taskFormData> = (errors) => console.log(errors)
 
   const handleCancel = () => {
-    // Don't reset the form data when canceling
-    onCancel()
-  }
+    onCancel();
+  };
 
   return (
     <Card className="mb-6">
@@ -119,18 +154,28 @@ export default function TaskForm({ onSubmit, onCancel, initialData }: TaskFormPr
             <Label htmlFor="title" className="text-sm font-medium">
               Title
             </Label>
-            <Input id="title" placeholder="Task title" {...registerWithPersist("title")} />
-            {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
+            <Input
+              id="title"
+              placeholder="Task title"
+              {...registerWithPersist("title")}
+            />
+            {errors.title && (
+              <p className="text-red-500 text-sm">{errors.title.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="description" className="text-sm font-medium">
               Description
             </Label>
-            <Textarea id="description" placeholder="Task description" {...registerWithPersist("description")} />
+            <Textarea
+              id="description"
+              placeholder="Task description"
+              {...registerWithPersist("description")}
+            />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 ">
             <div className="space-y-2">
               <Label htmlFor="status" className="text-sm font-medium">
                 Status
@@ -142,13 +187,13 @@ export default function TaskForm({ onSubmit, onCancel, initialData }: TaskFormPr
                   <Select
                     value={field.value}
                     onValueChange={(value) => {
-                      field.onChange(value)
+                      field.onChange(value);
                       if (!initialData) {
-                        dispatch(updateFormField({ field: "status", value }))
+                        dispatch(updateFormField({ field: "status", value }));
                       }
                     }}
                   >
-                    <SelectTrigger id="status">
+                    <SelectTrigger id="status" className="w-full">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -161,7 +206,7 @@ export default function TaskForm({ onSubmit, onCancel, initialData }: TaskFormPr
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 ">
               <Label htmlFor="priority" className="text-sm font-medium">
                 Priority
               </Label>
@@ -172,13 +217,13 @@ export default function TaskForm({ onSubmit, onCancel, initialData }: TaskFormPr
                   <Select
                     value={field.value}
                     onValueChange={(value) => {
-                      field.onChange(value)
+                      field.onChange(value);
                       if (!initialData) {
-                        dispatch(updateFormField({ field: "priority", value }))
+                        dispatch(updateFormField({ field: "priority", value }));
                       }
                     }}
                   >
-                    <SelectTrigger id="priority">
+                    <SelectTrigger id="priority" className="w-full">
                       <SelectValue placeholder="Priority" />
                     </SelectTrigger>
                     <SelectContent>
@@ -206,11 +251,13 @@ export default function TaskForm({ onSubmit, onCancel, initialData }: TaskFormPr
                         variant="outline"
                         className={cn(
                           "w-full justify-start text-left font-normal",
-                          !field.value && "text-muted-foreground",
+                          !field.value && "text-muted-foreground"
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value ? format(field.value, "PPP") : "Pick a due date"}
+                        {field.value
+                          ? format(field.value, "PPP")
+                          : "Pick a due date"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -218,9 +265,14 @@ export default function TaskForm({ onSubmit, onCancel, initialData }: TaskFormPr
                         mode="single"
                         selected={field.value}
                         onSelect={(date) => {
-                          field.onChange(date)
+                          field.onChange(date);
                           if (!initialData) {
-                            dispatch(updateFormField({ field: "due_date", value: date }))
+                            dispatch(
+                              updateFormField({
+                                field: "due_date",
+                                value: new Date(date!),
+                              })
+                            );
                           }
                         }}
                         initialFocus
@@ -237,11 +289,25 @@ export default function TaskForm({ onSubmit, onCancel, initialData }: TaskFormPr
           <Button type="button" variant="outline" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button type="submit" className="bg-black text-white hover:bg-gray-800">
-            {initialData ? "Update Task" : "Create Task"}
+          <Button
+            type="submit"
+            className="bg-black text-white hover:bg-gray-800 "
+            disabled={!session?.data.id || isPending}
+          >
+            {isPending ? (
+              <Loader
+                className="h-10 w-10 animate-spin text-gray-200"
+                size="48px"
+                strokeWidth={4}
+              />
+            ) : initialData ? (
+              "Update Task"
+            ) : (
+              "Create Task"
+            )}
           </Button>
         </CardFooter>
       </form>
     </Card>
-  )
+  );
 }

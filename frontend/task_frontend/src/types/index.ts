@@ -6,6 +6,12 @@ export type TaskPriority = "low" | "medium" | "high";
 
 
 
+export interface ToggleState {
+  toggles: {
+    [key: string]: boolean;
+  };
+}
+
 export interface Task {
   id: number;
   user_id: number;
@@ -14,28 +20,28 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   due_date?: string;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
   deleted_at?: string;
 }
 
 export interface KanbanColumnProps {
   status: TaskStatus;
   title: string;
-  tasks: Task[];
+  tasks: Task[] | undefined;
   onDrop: (taskId: number, newStatus: TaskStatus) => void;
   onEdit: (task: Task) => void;
-  onDelete: (taskId: number) => void;
+
 }
 
 export interface TaskCardProps {
   task: Task;
   onEdit: () => void;
   onDelete: () => void;
+  isDeleting?: boolean
 }
 
 export interface TaskFormProps {
-  onSubmit: (task: any) => void;
   onCancel: () => void;
   initialData?: Task | null;
 }
@@ -58,4 +64,11 @@ export interface SessionState {
   user: UserPayload | null
   loading: boolean
   initialized: boolean
+}
+
+
+export interface TaskState {
+  tasks: Task[] | undefined
+  loading: boolean,
+  error: null
 }
