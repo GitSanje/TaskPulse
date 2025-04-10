@@ -12,18 +12,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useAppDispatch,  } from "@/store/hooks"
+import { useAppDispatch } from "@/store/hooks"
 import { clearSession } from "@/store/sessionSlice"
 import { toast } from "sonner"
-import {  useSession } from "@/hooks/useSession"
+
 import { axiosPrivate } from "@/hooks/axios"
+import { resetTasksState } from "@/store/taskSlice"
+import useGloabalContext from "@/hooks/globalContextProvider"
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const {session } = useSession()
+ const { session} = useGloabalContext()
 
   const handleLogout = async () => {
     try {
@@ -38,6 +40,7 @@ export default function Navbar() {
         setTimeout(() => {
               // Clear the user from Redux
         dispatch(clearSession())
+        dispatch(resetTasksState())
           toast.success("Logged out successfully!")
           navigate("/")
         },2000)
@@ -72,13 +75,13 @@ export default function Navbar() {
           </Link>
         </nav>
         <div className="ml-auto md:ml-4 flex gap-2">
-          {session.data ? (
+          {session ? (
             <div className="hidden md:flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2">
                     <User className="h-4 w-4" />
-                    <span>{session.data?.username}</span>
+                    <span>{session?.username}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -137,11 +140,11 @@ export default function Navbar() {
               Contact
             </Link>
 
-            {session.data ? (
+            {session ? (
               <div className="mt-2">
                 <div className="flex items-center gap-2 mb-2">
                   <User className="h-4 w-4" />
-                  <span className="font-medium">{session.data?.username}</span>
+                  <span className="font-medium">{session?.username}</span>
                 </div>
                 <div className="flex flex-col gap-2">
                   <Link to="/dashboard" className="text-sm hover:underline" onClick={() => setIsMenuOpen(false)}>

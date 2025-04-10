@@ -1,6 +1,7 @@
 import { deleteTask } from "@/actions/task";
 import TaskCard from "@/components/tasks/task-card";
-import { useSession } from "@/hooks/useSession";
+import useGloabalContext from "@/hooks/globalContextProvider";
+
 import { useAppDispatch } from "@/store/hooks";
 import { fetchUserTasks, invalidateCache } from "@/store/taskSlice";
 import { KanbanColumnProps, TaskStatus } from "@/types";
@@ -18,7 +19,7 @@ export default function KanbanColumn({
   const [isPending, startTransition] = useTransition();
   const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
   const dispatch = useAppDispatch();
-  const { session } = useSession();
+ const { session} = useGloabalContext()
   const handleDeleteTask = async (taskId: number) => {
     setDeletingTaskId(taskId); // show spinner for this card
 
@@ -29,7 +30,7 @@ export default function KanbanColumn({
           toast.success(result.message);
           setTimeout(() => {
             dispatch(invalidateCache());
-            dispatch(fetchUserTasks(session.data?.userId!));
+            dispatch(fetchUserTasks(session?.userId!));
           }, 1000);
         } else {
           toast.error(result?.message);

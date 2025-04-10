@@ -1,21 +1,13 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
-import type { UserPayload } from "@/types"
+import { createSlice } from "@reduxjs/toolkit"
 
 interface SessionState {
-  user: UserPayload | null
+  user: any | null
   loading: boolean
   initialized: boolean
 }
 
-const initialState: SessionState = {
-  user: {
-   
-      userId: undefined,
-      email: "",
-      username: "",
-      profile_url: "",
-    
-  },
+const initialState:SessionState = {
+  user: null,
   loading: true,
   initialized: false,
 }
@@ -24,12 +16,12 @@ export const sessionSlice = createSlice({
   name: "session",
   initialState,
   reducers: {
-    setUser: (state, action: PayloadAction<{ userData: UserPayload | null }>) => {
-      state.user = action.payload.userData 
+    setUser: (state, action) => {
+      state.user = action.payload 
       state.loading = false
-      state.initialized = action.payload.userData ? true : false
+      state.initialized = true
     },
-    setLoading: (state, action: PayloadAction<boolean>) => {
+    setLoading: (state, action) => {
       state.loading = action.payload
     },
     clearSession: (state) => {

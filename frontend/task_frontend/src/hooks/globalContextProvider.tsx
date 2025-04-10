@@ -1,8 +1,9 @@
 "use client";
 
 import { createContext, ReactNode, useContext } from "react";
-import { useSession } from "./useSession";
+
 import { UserPayload } from "@/types";
+import { useAppSelector } from "@/store/hooks";
 
 interface GlobalContextType {
   session: UserPayload | null;
@@ -16,13 +17,15 @@ interface Props {
 export const GlobalProvider: React.FC<Props> = (props) => {
   const { children } = props;
 
-  const {session} = useSession();
+ const { user } = useAppSelector(
+    (state) => state.session
+  );
 
 
 
 
   return (
-    <globalContext.Provider value={{ session: session.data}}>
+    <globalContext.Provider value={{ session: user && user.data || null }}>
       {children}
     </globalContext.Provider>
   );

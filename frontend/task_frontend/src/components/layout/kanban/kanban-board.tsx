@@ -16,13 +16,14 @@ import KanbanBoardSkeleton from "./kanban-skeleton";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { toast } from "sonner";
-import { useSession } from "@/hooks/useSession";
+
 import { editTask } from "@/actions/task";
+import useGloabalContext from "@/hooks/globalContextProvider";
 
 export default function KanbanBoard() {
   const dispatch = useAppDispatch();
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const { session } = useSession();
+ const { session} = useGloabalContext()
   useAxiosPrivate();
   const toogleObj = useAppSelector((state) => state.toogle.toggles);
   const isFormOpen = toogleObj["taskform"] ?? false;
@@ -32,8 +33,8 @@ export default function KanbanBoard() {
   const [, startTransition] = useTransition();
 
   useEffect(() => {
-    if (session?.data) {
-       dispatch(fetchUserTasks(session?.data.userId!));
+    if (session) {
+       dispatch(fetchUserTasks(session.userId!));
     
     }
   }, [session, dispatch]);

@@ -55,11 +55,13 @@ import { toast } from "sonner";
 
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { fetchUserTasks, invalidateCache } from "@/store/taskSlice";
-import { useSession } from "@/hooks/useSession";
+
 import { toggle } from "@/store/toogleSlice";
+import useGloabalContext from "@/hooks/globalContextProvider";
 
 export default function TaskForm({  initialData }: TaskFormProps) {
-  const { session } = useSession();
+
+ const { session} = useGloabalContext()
   useAxiosPrivate(); // Initialize axios private instance
   const [isPending, startTransition] = useTransition();
   const dispatch = useAppDispatch();
@@ -121,7 +123,7 @@ export default function TaskForm({  initialData }: TaskFormProps) {
       try {
 
         
-        const finalData = { ...data, user_id: session.data?.userId as number };
+        const finalData = { ...data, user_id: session?.userId as number };
           // Call addtask server function
 
           let result;
@@ -140,7 +142,7 @@ export default function TaskForm({  initialData }: TaskFormProps) {
               // Reset the form in Redux after successful submission
               dispatch(resetForm());
               dispatch(invalidateCache())
-              dispatch(fetchUserTasks(session.data?.userId!));
+              dispatch(fetchUserTasks(session?.userId!));
               handleCancel();
             }, 2000);
           } else {
@@ -320,7 +322,7 @@ export default function TaskForm({  initialData }: TaskFormProps) {
           <Button
             type="submit"
             className="bg-black text-white hover:bg-gray-800 "
-            disabled={!session.data?.userId! || isPending}
+            disabled={!session?.userId! || isPending}
           >
             {isPending ? (
               <Loader

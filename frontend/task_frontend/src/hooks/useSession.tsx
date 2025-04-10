@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { clearSession, setUser } from "@/store/sessionSlice";
-import { UserPayload } from "@/types";
+
 import axios from "axios";
 import { useCallback, useEffect } from "react";
 import { axiosPrivate } from "./axios";
@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 export const useSession = () => {
   const dispatch = useAppDispatch();
-  const { user, loading, initialized } = useAppSelector(
+  const {  loading, initialized } = useAppSelector(
     (state) => state.session
   );
 
@@ -19,9 +19,9 @@ export const useSession = () => {
         withCredentials: true, // to include cookies
       });
 
-      const data: UserPayload = res.data;
-      dispatch(setUser({userData:data}));
-      return { data: data };
+      const data = res.data;
+      dispatch(setUser(data));
+      return data;
     } catch (err) {
       console.error("Failed to fetch user", err);
 
@@ -39,8 +39,8 @@ export const useSession = () => {
       fetchSession();
     }
   }, [fetchSession, initialized]);
-  const session = { data: user}
-  return {session , loading, fetchSession };
+
+  return { loading, fetchSession };
 };
 
 // Add a logout function that can be used anywhere in the app
