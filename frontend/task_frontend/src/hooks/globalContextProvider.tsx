@@ -20,16 +20,6 @@ export const GlobalProvider: React.FC<Props> = (props) => {
   const session = user || null;
 
 
-    const handleEditTask = (updatedTask: Task) => {
-      // setTasks(
-      //   tasks.map((task) =>
-      //     task.id === updatedTask.id ? { ...updatedTask, updated_at: new Date().toISOString() } : task,
-      //   ),
-      //)
-    
-      dispatch(toggle("taskform"));
-    };
-  
 
   return (
     <globalContext.Provider value={{ session: session }}>

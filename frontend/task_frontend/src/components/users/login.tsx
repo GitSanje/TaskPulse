@@ -67,7 +67,8 @@ export default function LoginPage() {
   
           //  Fetch session after successful login
           const session = await fetchSession();
-
+          console.log(session);
+          
            
           if (session?.data.userId) {
             // Redirect if session is valid

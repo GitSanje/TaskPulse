@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import corsOptions from "./config/corsOptions.js";
 import cors from "cors";
-import { logger } from "./middleware/logger.js";
+// import { logger } from "./middleware/logger.js";
 import errorHandler from "./middleware/errorHandler.js";
 import userRouters from "./routes/userRoutes.js";
 import taskRouter from "./routes/taskRoutes.js";
@@ -20,7 +20,7 @@ const configureMiddleware = () => {
 // Use cookie parser middleware to parse cookies
   app.use(cookieParser())
   app.use(cors(corsOptions)); 
-  app.use(logger);
+  // app.use(logger);
   app.use(express.json()); // Parse JSON payloads from incoming requests
   app.use(errorHandler);
 };

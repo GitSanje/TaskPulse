@@ -19,7 +19,7 @@ pool.connect().then(
     () => console.log('✅ Connected to Neon PostgreSQL')
  ) .catch(err =>{
     
-    logEvents( `${err.name}: ${err.message}\t${err.code}\t${err.stack}`, 'postgressErr.log')
+    //logEvents( `${err.name}: ${err.message}\t${err.code}\t${err.stack}`, 'postgressErr.log')
     console.error('❌ Connection error:', err.stack)}
 
 );
@@ -29,7 +29,7 @@ pool.connect().then(
 
 pool.on('error', (err, client) => {
 
-    logEvents(`${err.name}: ${err.message}\t${err.stack}`, 'postgressErr.log');
+    //logEvents(`${err.name}: ${err.message}\t${err.stack}`, 'postgressErr.log');
     process.exit(-1); 
 
 });

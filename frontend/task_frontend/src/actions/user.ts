@@ -2,12 +2,12 @@
 
 import { SignupFormData, SignInFormData } from "@/types";
 import axios from "axios";
-
+import {axios2}  from "@/hooks/axios";
 export const signup = async (data: SignupFormData) => {
   try {
     const { first_name, last_name, email, password } = data;
-    const response = await axios.post(
-      "http://localhost:3500/api/users/create_user",
+    const response = await axios2.post(
+      "api/users/create_user",
       {
         first_name,
         last_name,
@@ -52,13 +52,13 @@ export const signup = async (data: SignupFormData) => {
 export const signIn = async (data: SignInFormData) => {
   try {
     const { email, password } = data;
-    const response = await axios.post(
-      "http://localhost:3500/api/users/login",
+    const response = await axios2.post(
+      "api/users/login",
       {
         email,
         password,
       },
-      { withCredentials: true } //// Necessary to receive cookies
+      { withCredentials: true } // Necessary to receive cookies
     );
 
     if (response.data.status) {

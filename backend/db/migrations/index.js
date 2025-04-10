@@ -39,7 +39,7 @@ const runDBMigrations = async() => {
         console.log('====================================');
         console.log('DB migration failed');
         console.log('====================================');
-        logEvents(`${error.name}: ${error.message}\t${error.stack}`, 'migrationError.log');
+       // logEvents(`${error.name}: ${error.message}\t${error.stack}`, 'migrationError.log');
     }finally {
         // Release the client back to the pool
         client.release()
