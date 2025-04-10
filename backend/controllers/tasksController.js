@@ -94,6 +94,26 @@ const getUserTasks = asyncHandler(async (req, res) => {
 
 
 /**
+ * @desc edit a task by ID
+ * @route POST /api/tasks/edit/id
+ * @access Private (Admin only or authenticated user)
+ */
+const editTask = asyncHandler(async (req, res) => {
+  const task = req.body;
+  const { id } = req.params;
+  console.log(id, task);
+  const result=  await taskServices.updateTask('id', id,task);
+  console.log(result);
+  
+  if(!result){
+    return res.status(400).json({ status: false, message: "Failed to edit the task"})
+  }
+  return res.status(201).json({ status: true, message: "Task edited successfully" });
+});
+
+
+
+/**
  * @desc Deletes a task by ID
  * @route DELETE /api/tasks/:id
  * @access Private (Admin only or authenticated user)
@@ -105,4 +125,4 @@ const deleteTask = asyncHandler(async (req, res) => {
 });
 
 
-export default { createNewTask, getAllTasks, deleteTask,getATask,getUserTasks };
+export default { createNewTask, getAllTasks, deleteTask,getATask,getUserTasks,editTask };

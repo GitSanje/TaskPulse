@@ -19,10 +19,9 @@ export const fetchUserTasks = createAsyncThunk(
   "tasks/fetchUserTasks",
   async (userId: number, thunkAPI) => {
     const state = thunkAPI.getState() as { tasks: TaskState };
-    console.log('full state:', state); // Log the entire state for debugging
+
     const { lastFetched, cacheTTL, tasks } = state.tasks;
-    console.log('lastFetched:', lastFetched, 'cacheTTL:', cacheTTL, 'tasks:', tasks);
-   
+  
     // Check if we have cached data and it's still fresh
     const now = Date.now();
     if (lastFetched && now - lastFetched < cacheTTL){

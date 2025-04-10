@@ -115,10 +115,14 @@ export const deleteTask = async (id: number) => {
 };
 
 
+type taskEditFrom = taskFormData & {
+  id?: number;
 
-export const editTask = async (task: taskFormData) => {
+} 
+
+export const editTask = async (task: taskEditFrom, id:number) => {
   try {
-    const response = await axiosPrivate.post(`/api/tasks/edit`, task, {
+    const response = await axiosPrivate.post(`/api/tasks/edit/${id}`, task, {
       withCredentials: true,
     });
 
@@ -128,6 +132,8 @@ export const editTask = async (task: taskFormData) => {
 
     return { success: false, message: "Failed to edit task." };
   } catch (error) {
+    console.log(error);
+    
     if (axios.isAxiosError(error)) {
       return {
         success: false,

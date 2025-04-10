@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -17,6 +17,7 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { toast } from "sonner";
 import { useSession } from "@/hooks/useSession";
+import { editTask } from "@/actions/task";
 
 export default function KanbanBoard() {
   const dispatch = useAppDispatch();
@@ -28,31 +29,50 @@ export default function KanbanBoard() {
 
   const tasks = useAppSelector((state) => state.tasks.tasks);
   const loading = useAppSelector((state) => state.tasks.loading);
-
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     if (user?.data) {
        dispatch(fetchUserTasks(user?.data.userId));
-      // dispatch(resetTasksState())
+    
     }
   }, [user, dispatch]);
 
-  const handleDrop = (taskId: number, newStatus: TaskStatus) => {
-   dispatch(updateTaskItem({id:taskId, key: 'status', value:newStatus}))
+  const handleDrop = (taskId: number, newStatus: TaskStatus, currentStatus: TaskStatus) => {
+
+    if(newStatus === currentStatus){
+      return;
+    }
+
+
+    
+    startTransition(async () => {
+      // Update the database first
+      const taskObj = {
+        status: newStatus,
+      };
+   
+      dispatch(updateTaskItem({ id: taskId, key: "status", value: newStatus }));
+      toast.success(`Moved to the ${newStatus}`);
+      // Call editTask to update the task in the database
+      const updatedTask = await editTask(taskObj, taskId);
+     
+  
+      if (updatedTask.success) {
+        // Once the database update is successful, dispatch the update action
+      
+        // Show success toast
+
+      } else {
+        // Handle any potential errors or failed updates
+        toast.error("Failed to update task status");
+      }
+    });
   };
 
-  const handleEditTask = (updatedTask: Task) => {
-    // setTasks(
-    //   tasks.map((task) =>
-    //     task.id === updatedTask.id ? { ...updatedTask, updated_at: new Date().toISOString() } : task,
-    //   ),
-    //)
-    setEditingTask(null);
-    dispatch(toggle("taskform"));
-  };
 
 
-
+  
   const openEditForm = (task: Task) => {
     setEditingTask(task);
     dispatch(toggle("taskform"));

@@ -3,15 +3,15 @@
 import type React from "react";
 
 // ───── React & State ─────
-import { useTransition } from "react";
+import { useEffect, useTransition } from "react";
 
 // ───── Form Handling ─────
-import { Controller, SubmitErrorHandler, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 // ───── Redux ─────
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { resetForm, updateFormField } from "@/store/formSlice";
+import { resetForm, setFormData, updateFormField } from "@/store/formSlice";
 
 // ───── Shadcn UI Components ─────
 import {
@@ -49,10 +49,10 @@ import { format } from "date-fns";
 // ───── Types & Schemas ─────
 import { taskSchema } from "@/schemas";
 import type { taskFormData, TaskFormProps } from "@/types";
-import useGloabalContext from "@/hooks/globalContextProvider";
-import { addTask } from "@/actions/task";
+
+import { addTask, editTask } from "@/actions/task";
 import { toast } from "sonner";
-import { data } from "react-router-dom";
+
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { fetchUserTasks, invalidateCache } from "@/store/taskSlice";
 import { useSession } from "@/hooks/useSession";
@@ -65,9 +65,14 @@ export default function TaskForm({ onCancel, initialData }: TaskFormProps) {
   const persistedFormData = useAppSelector((state) => state.form.formData);
   const isDirty = useAppSelector((state) => state.form.isDirty);
 
+  useEffect (() => {
+    if(initialData){
+      dispatch(setFormData(initialData))
+    }
+  },[])
   // Determine which data to use as default values
   const defaultValues =
-    isDirty && !initialData
+    isDirty 
       ? {
           ...persistedFormData,
           user_id: user?.data.userId,
@@ -101,9 +106,9 @@ export default function TaskForm({ onCancel, initialData }: TaskFormProps) {
       onChange: (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
       ) => {
-        if (!initialData) {
+        // if (!initialData) {
           dispatch(updateFormField({ field: name, value: e.target.value }));
-        }
+        //}
       },
     };
   };
@@ -111,22 +116,37 @@ export default function TaskForm({ onCancel, initialData }: TaskFormProps) {
   const onFormSubmit = (data: taskFormData) => {
     startTransition(async () => {
       try {
+
+        
         const finalData = { ...data, user_id: user?.data.userId as number };
-        // Call addtask server function
-        const result = await addTask(finalData);
-        if (result?.success) {
-          // If successful
-          toast.success(result.message);
-          setTimeout(() => {
-            // Reset the form in Redux after successful submission
-            dispatch(resetForm());
-            dispatch(invalidateCache())
-            dispatch(fetchUserTasks(user?.data.userId));
-            handleCancel();
-          }, 2000);
-        } else {
-          toast.error(result?.message);
-        }
+          // Call addtask server function
+
+          let result;
+          if(initialData){
+             result =  await editTask(data,initialData.id)
+          }
+          else{
+            result = await addTask(finalData);
+          }
+    
+          
+          if (result?.success) {
+            // If successful
+            toast.success(result.message);
+            setTimeout(() => {
+              // Reset the form in Redux after successful submission
+              dispatch(resetForm());
+              dispatch(invalidateCache())
+              dispatch(fetchUserTasks(user?.data.userId));
+              handleCancel();
+            }, 2000);
+          } else {
+            toast.error(result?.message);
+          }
+        
+      
+        
+      
       } catch (error) {
         console.log(error);
         toast.error("Error creating account");

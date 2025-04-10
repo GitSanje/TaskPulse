@@ -3,7 +3,7 @@ import TaskCard from "@/components/tasks/task-card";
 import { useSession } from "@/hooks/useSession";
 import { useAppDispatch } from "@/store/hooks";
 import { fetchUserTasks, invalidateCache } from "@/store/taskSlice";
-import { KanbanColumnProps } from "@/types";
+import { KanbanColumnProps, TaskStatus } from "@/types";
 import { useState, useTransition } from "react";
 import { useDrop } from "react-dnd";
 import { toast } from "sonner";
@@ -48,8 +48,8 @@ export default function KanbanColumn({
     //What types of draggable items this target can accept.
     accept: "task",
     //Callback when an item is dropped.
-    drop: (item: { id: number }) => {
-      onDrop(item.id, status);
+    drop: (item: { id: number, status: TaskStatus }) => {
+      onDrop(item.id, status, item.status);
     },
     //collect is a function used with monitors to expose drag state (like isOver, canDrop)
     // to track the drag and drop state

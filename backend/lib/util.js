@@ -180,19 +180,42 @@ export const findItemsBy = async (tableName, key, value, excludedFields = []) =>
 };
 
 
-
-
-export const update= async (tableName,key, value, updatedData) => {
+/**
+ * Updates a record in the specified table based on the provided `key` and `value` 
+ * and updates it with the fields and values provided in `updatedData`.
+ * 
+ * @param {string} tableName - The name of the table to update.
+ * @param {string} key - The column name to match against for the WHERE condition.
+ * @param {string} value - The value of the `key` to identify the record to update.
+ * @param {object} updatedData - An object containing the fields to be updated with their new values.
+ * @returns {Promise<object | null>} - The updated row if successful, or null if no rows were affected.
+ * 
+ * @example
+ * const updatedRow = await update('users', 'id', 1, { name: 'John Doe', email: 'john.doe@example.com' });
+ * console.log(updatedRow);
+ */
+export const update = async (tableName, key, value, updatedData) => {
+  // Extract fields and their corresponding values from the updatedData object
   const fields = Object.keys(updatedData);
   const values = Object.values(updatedData);
 
-  const setClause = fields.map((field, index) => format('%I = $%s', field, index + 1)).join(', ');
-
+  // Construct the SET clause for the SQL query
+  const setClause = fields
+    .map((field, index) => format('%I = $%s', field, index + 1))
+    .join(', ');
+  console.log(setClause);
+  
+  // Format the SQL query string
   const query = format(
-    `UPDATE %I SET ${setClause} WHERE %I = $1 RETURNING *`,tableName,key
+    `UPDATE %I SET ${setClause} WHERE %I = $%s RETURNING *`,
+    tableName,
+    key,
+    fields.length + 1 
   );
 
-  const result = await pool.query(query, [...values, taskId]);
+  // Execute the query using the formatted SQL string and provided values
+  const result = await pool.query(query, [...values, value]);
 
+  // Return the updated row if the update was successful, or null if no rows were affected
   return result.rowCount > 0 ? result.rows[0] : null;
 };

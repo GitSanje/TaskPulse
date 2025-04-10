@@ -29,7 +29,7 @@ export interface KanbanColumnProps {
   status: TaskStatus;
   title: string;
   tasks: Task[] | undefined;
-  onDrop: (taskId: number, newStatus: TaskStatus) => void;
+  onDrop: (taskId: number, newStatus: TaskStatus, currentStatus:TaskStatus) => void;
   onEdit: (task: Task) => void;
 
 }

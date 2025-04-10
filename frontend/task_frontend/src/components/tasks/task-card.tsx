@@ -17,7 +17,7 @@ import { TaskCardProps } from "@/types";
 export default function TaskCard({ task, onEdit, onDelete,isDeleting  }: TaskCardProps) {
   const [{ isDragging }, drag] = useDrag({
     type: "task",
-    item: { id: task.id },
+    item: { id: task.id, status:task.status },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),

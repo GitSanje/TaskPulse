@@ -1,6 +1,6 @@
 
 import pool from "../config/db.js"
-import { deleteOne, findOne,findItemsBy } from "../lib/util.js";
+import { deleteOne, findOne,findItemsBy, update } from "../lib/util.js";
 
 
 
@@ -69,14 +69,27 @@ async createTask(taskObj) {
     return task;
   }
 
+    /**
+   * @desc Finds all tasks belonging to a user
+   * @param {string} userId
+   * @returns {Promise<Array>} List of tasks
+   */
+  async findTasksByUserId(userId) {
+    return await findItemsBy("tasks", "user_id", userId); 
+  }
+
+
   /**
- * @desc Finds all tasks belonging to a user
- * @param {string} userId
- * @returns {Promise<Array>} List of tasks
- */
-async findTasksByUserId(userId) {
-  return await findItemsBy("tasks", "user_id", userId); 
-}
+   * @desc Update a task in the 'tasks' table 
+   * @param {string} key - The column name to search by (e.g., 'id', 'email')
+   * @param {any} value - The value to match against the specified key
+    * @param {object} updatedData - An object containing the fields to be updated with their new values.
+   * @returns {Promise<Object|null>} The task object 
+   */
+  async updateTask(key, value, tasks) {
+    const task = await update('tasks', key, value, tasks);
+    return task;
+  }
 
 
   /**
