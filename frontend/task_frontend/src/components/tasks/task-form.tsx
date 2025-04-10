@@ -56,18 +56,20 @@ import { toast } from "sonner";
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { fetchUserTasks, invalidateCache } from "@/store/taskSlice";
 import { useSession } from "@/hooks/useSession";
+import { toggle } from "@/store/toogleSlice";
 
-export default function TaskForm({ onCancel, initialData }: TaskFormProps) {
+export default function TaskForm({  initialData }: TaskFormProps) {
   const { user } = useSession();
   useAxiosPrivate(); // Initialize axios private instance
   const [isPending, startTransition] = useTransition();
   const dispatch = useAppDispatch();
   const persistedFormData = useAppSelector((state) => state.form.formData);
   const isDirty = useAppSelector((state) => state.form.isDirty);
+  const isEdit = useAppSelector((state) => state.form.isEdit);
 
   useEffect (() => {
     if(initialData){
-      dispatch(setFormData(initialData))
+      dispatch(setFormData({task:initialData, isEdit:true}))
     }
   },[])
   // Determine which data to use as default values
@@ -158,14 +160,15 @@ export default function TaskForm({ onCancel, initialData }: TaskFormProps) {
   // const onError: SubmitErrorHandler<taskFormData> = (errors) => console.log(errors)
 
   const handleCancel = () => {
-    onCancel();
+    dispatch(toggle("taskform"));
+    dispatch(resetForm());
   };
 
   return (
     <Card className="mb-6">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-center">
-          <CardTitle>{initialData ? "Edit Task" : "Create New Task"}</CardTitle>
+          <CardTitle>{initialData || isEdit ? "Edit Task" : "Create New Task"}</CardTitle>
           <Button variant="ghost" size="icon" onClick={handleCancel}>
             <X className="h-4 w-4" />
           </Button>
@@ -324,7 +327,7 @@ export default function TaskForm({ onCancel, initialData }: TaskFormProps) {
                 size="48px"
                 strokeWidth={4}
               />
-            ) : initialData ? (
+            ) : initialData || isEdit ? (
               "Update Task"
             ) : (
               "Create Task"

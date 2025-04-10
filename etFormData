@@ -1,0 +1,29 @@
+[33mcommit 1ac76235662e03ab9878ea75d66ae7fb72c8a0f2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: Sanjay Karki <karkisanjay2002@gmail.com>
+Date:   Thu Apr 10 14:01:26 2025 +0545
+
+    implememted the caching
+
+[33mcommit 2d3f623b915285406472680f88c6e76a491e9eee[m
+Author: Sanjay Karki <karkisanjay2002@gmail.com>
+Date:   Thu Apr 10 11:17:36 2025 +0545
+
+    added skeleton components, reducer to fetch the tasks and backend funcs
+
+[33mcommit 620a8d4b93847b7202dab3099489b9d82970dc8c[m
+Author: Sanjay Karki <karkisanjay2002@gmail.com>
+Date:   Wed Apr 9 21:40:14 2025 +0545
+
+    added axios private route to intecept the failure response and call the refresh token
+
+[33mcommit 00847f319eeb9bf8841d13729f0848239ea44953[m
+Author: Sanjay Karki <karkisanjay2002@gmail.com>
+Date:   Wed Apr 9 08:09:47 2025 +0545
+
+     backend of taskmanager in express js
+
+[33mcommit d0acc90aa8acb5916bb473f8d2bb940fd2aa7ce7[m
+Author: Sanjay Karki <karkisanjay2002@gmail.com>
+Date:   Wed Apr 9 08:06:55 2025 +0545
+
+    frontend kandbanBoard in react js

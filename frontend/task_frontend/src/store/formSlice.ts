@@ -4,6 +4,7 @@ import type { taskFormData } from "@/types"
 interface FormState {
   formData: taskFormData
   isDirty: boolean
+  isEdit: boolean
 }
 
 const initialState: FormState = {
@@ -14,6 +15,7 @@ const initialState: FormState = {
     priority: "medium",
     due_date: undefined,
   },
+  isEdit: false,
   isDirty: false,
 }
 export const formSlice = createSlice({
@@ -24,9 +26,11 @@ export const formSlice = createSlice({
         state.formData[action.payload.field] = action.payload.value
         state.isDirty = true
       },
-      setFormData: (state, action: PayloadAction<taskFormData>) => {
-        state.formData = action.payload
+      setFormData: (state, action: PayloadAction<{task: taskFormData, isEdit:boolean}>) => {
+
+        state.formData = action.payload.task
         state.isDirty = true
+        state.isEdit = action.payload.isEdit
       },
       resetForm: () => initialState,
     },

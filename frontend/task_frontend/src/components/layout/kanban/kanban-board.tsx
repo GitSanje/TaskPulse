@@ -107,7 +107,7 @@ export default function KanbanBoard() {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="mb-6 flex justify-between items-center">
-        <h2 className="text-xl font-semibold">My Tasks</h2>
+        <h2 className="text-xl font-semibold text-indigo-700">My Tasks</h2>
         <Button
           onClick={() => {
             setEditingTask(null);
@@ -122,9 +122,7 @@ export default function KanbanBoard() {
 
       {isFormOpen && (
         <TaskForm
-          onCancel={() => {
-            dispatch(toggle("taskform"));
-          }}
+         
           initialData={editingTask}
         />
       )}

@@ -2,7 +2,14 @@
 
 import { useDrag } from "react-dnd";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Clock, Loader2, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Loader2,
+  MoreVertical,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import {
   DropdownMenu,
@@ -13,11 +20,20 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { TaskCardProps } from "@/types";
+import { useState } from "react";
+import TaskDetailModal from "./task-detail-model";
 
-export default function TaskCard({ task, onEdit, onDelete,isDeleting  }: TaskCardProps) {
+export default function TaskCard({
+  task,
+  onEdit,
+  onDelete,
+  isDeleting,
+}: TaskCardProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [{ isDragging }, drag] = useDrag({
     type: "task",
-    item: { id: task.id, status:task.status },
+    item: { id: task.id, status: task.status },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
@@ -49,78 +65,111 @@ export default function TaskCard({ task, onEdit, onDelete,isDeleting  }: TaskCar
   };
 
   const dueDate = getDueDate();
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't open modal if clicking on dropdown menu or if dragging
+    if (
+      e.target instanceof Element &&
+      (e.target.closest('[role="menuitem"]') ||
+        e.target.closest('[role="menu"]') ||
+        e.target.closest("button"))
+    ) {
+      return;
+    }
+
+    setIsModalOpen(true);
+  };
+
   return (
-    <Card
-      ref={drag}
-      className={`cursor-grab relative  ${
-        isDragging ? "opacity-50" : "opacity-100"
-        
-      } transition-opacity`}
-    >
-      { isDeleting && (
-        <div className="absolute inset-0 z-20 bg-white/80 flex items-center justify-center rounded-lg">
-          <Loader2 className="w-5 h-5 animate-spin text-primary" />
-        </div>
-      )}
-      <CardContent className={`p-4 space-y-2 ${isDeleting ? "opacity-50" : ""}`}>
-        <div className="flex justify-between items-start mb-2">
-          <h4 className="font-medium text-sm uppercase">{task.title}</h4>
-          <DropdownMenu>
-            <DropdownMenuTrigger className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-muted">
-              <MoreVertical className="h-4 w-4" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onEdit} className="cursor-pointer">
-                <Pencil className="h-4 w-4 mr-2" />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={onDelete}
-                className="cursor-pointer text-destructive"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {task.description && (
-          <p className=" text-start text-muted-foreground text-sm mb-3 line-clamp-2 ">
-            {task.description}
-          </p>
+    <>
+      <Card
+        ref={drag}
+        className={`cursor-grab relative  ${
+          isDragging ? "opacity-50" : "opacity-100"
+        } transition-opacity`}
+        onClick={handleCardClick}
+      >
+        {isDeleting && (
+          <div className="absolute inset-0 z-20 bg-white/80 flex items-center justify-center rounded-lg">
+            <Loader2 className="w-5 h-5 animate-spin text-primary" />
+          </div>
         )}
-        <div className="flex flex-wrap gap-2 mt-2">
-          <Badge
-            variant="secondary"
-            className={getPriorityColor(task.priority)}
-          >
-            {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-          </Badge>
+        <CardContent
+          className={`p-4 space-y-2 ${isDeleting ? "opacity-50" : ""}`}
+        >
+          <div className="flex justify-between items-start mb-2">
+            <h4 className="font-medium text-sm uppercase">{task.title}</h4>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-muted">
+                <MoreVertical className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={onEdit} className="cursor-pointer">
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={onDelete}
+                  className="cursor-pointer text-destructive"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
-          {dueDate && (
-            <Badge
-              variant="outline"
-              className={`flex items-center gap-1 ${
-                dueDate.isPastDue ? "text-red-600 border-red-200" : ""
-              }`}
-            >
-              <Calendar className="h-3 w-3" />
-              <span>{dueDate.formatted}</span>
-            </Badge>
+          {task.description && (
+            <p className=" text-start text-muted-foreground text-sm mb-3 line-clamp-2 ">
+              {task.description}
+            </p>
           )}
-        </div>
+          <div className="flex flex-wrap gap-2 mt-2">
+            <Badge
+              variant="secondary"
+              className={getPriorityColor(task.priority)}
+            >
+              {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+            </Badge>
 
-        <div className="flex items-center text-xs text-muted-foreground mt-3">
-          <Clock className="h-3 w-3 mr-1" />
-          <span>
-            Created{" "}
-            {formatDistanceToNow(new Date(task.created_at), {
-              addSuffix: true,
-            })}
-          </span>
-        </div>
-      </CardContent>
-    </Card>
+            {dueDate && (
+              <Badge
+                variant="outline"
+                className={`flex items-center gap-1 ${
+                  dueDate.isPastDue ? "text-red-600 border-red-200" : ""
+                }`}
+              >
+                <Calendar className="h-3 w-3" />
+                <span>{dueDate.formatted}</span>
+              </Badge>
+            )}
+          </div>
+
+          <div className="flex items-center text-xs text-muted-foreground mt-3">
+            <Clock className="h-3 w-3 mr-1" />
+            <span>
+              Created{" "}
+              {formatDistanceToNow(new Date(task.created_at), {
+                addSuffix: true,
+              })}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+      <TaskDetailModal
+        task={task}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onEdit={() => {
+          setIsModalOpen(false);
+          onEdit();
+        }}
+        onDelete={() => {
+          setIsModalOpen(false);
+          onDelete();
+        }}
+      />
+    </>
   );
 }

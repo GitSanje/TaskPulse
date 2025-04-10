@@ -18,7 +18,7 @@ const taskPersistConfig = {
 const formPersistConfig = {
   key: "taskform",
   storage,
-  whitelist: ["formData", "isDirty"],
+  whitelist: ["formData", "isDirty","isEdit"],
 }
 
 // Persist configuration for session data

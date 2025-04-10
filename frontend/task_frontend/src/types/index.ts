@@ -42,7 +42,7 @@ export interface TaskCardProps {
 }
 
 export interface TaskFormProps {
-  onCancel: () => void;
+
   initialData?: Task | null;
 }
 
