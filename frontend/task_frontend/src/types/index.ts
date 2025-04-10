@@ -70,5 +70,8 @@ export interface SessionState {
 export interface TaskState {
   tasks: Task[] | undefined
   loading: boolean,
-  error: null
+  error: string| null
+  lastFetched:number | null,
+  cacheTTL: number,
+
 }

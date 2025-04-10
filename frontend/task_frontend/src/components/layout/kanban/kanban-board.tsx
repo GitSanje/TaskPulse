@@ -9,20 +9,19 @@ import { PlusCircle } from "lucide-react";
 import type { Task, TaskStatus } from "@/types";
 import TaskForm from "@/components/tasks/task-form";
 import KanbanColumn from "./kanban-col";
-import useGloabalContext from "@/hooks/globalContextProvider";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggle } from "@/store/toogleSlice";
-import { fetchUserTasks } from "@/store/taskSlice";
+import { fetchUserTasks, updateTaskItem } from "@/store/taskSlice";
 import KanbanBoardSkeleton from "./kanban-skeleton";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
-import { deleteTask } from "@/actions/task";
 import { toast } from "sonner";
+import { useSession } from "@/hooks/useSession";
 
 export default function KanbanBoard() {
   const dispatch = useAppDispatch();
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const { session } = useGloabalContext();
+  const { user } = useSession();
   useAxiosPrivate();
   const toogleObj = useAppSelector((state) => state.toogle.toggles);
   const isFormOpen = toogleObj["taskform"] ?? false;
@@ -30,15 +29,16 @@ export default function KanbanBoard() {
   const tasks = useAppSelector((state) => state.tasks.tasks);
   const loading = useAppSelector((state) => state.tasks.loading);
 
-  // In a real app, you would fetch tasks from your API
+
   useEffect(() => {
-    if (session?.data) {
-      dispatch(fetchUserTasks(session?.data.id));
+    if (user?.data) {
+       dispatch(fetchUserTasks(user?.data.userId));
+      // dispatch(resetTasksState())
     }
-  }, [session, dispatch]);
+  }, [user, dispatch]);
 
   const handleDrop = (taskId: number, newStatus: TaskStatus) => {
-    // setTasks(tasks.map((task) => (task.id === taskId ? { ...task, status: newStatus } : task)))
+   dispatch(updateTaskItem({id:taskId, key: 'status', value:newStatus}))
   };
 
   const handleEditTask = (updatedTask: Task) => {

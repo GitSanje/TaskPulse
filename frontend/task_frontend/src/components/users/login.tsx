@@ -55,30 +55,36 @@ export default function LoginPage() {
   } = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema), // Integrate Zod validation
   });
-  useSession()
+    const {fetchSession} =  useSession()
    // function to handlle form submission
-    const onSubmit = async (data: SignInFormData) => {
-      startTransition(async () => {
-        try {
-          // Call signup server function
-          const result = await signIn(data);
-          if (result?.success) {
-            // If successful
-            toast.success("You can now surf the TaskPlus");
+   const onSubmit = async (data: SignInFormData) => {
+    startTransition(async () => {
+      try {
+        const result = await signIn(data);
+  
+        if (result?.success) {
+          toast.success("You cant now surf the TaskPlus");
+  
+          //  Fetch session after successful login
+          const session = await fetchSession();
 
+           
+          if (session?.data.userId) {
+            // Redirect if session is valid
             setTimeout(() => {
-          
               navigate("/dashboard");
-            }, 2000);
+            }, 1500);
+          } else {
+            toast.error("Could not fetch session. Try again.");
           }
-          else{
-              toast.error(result?.message || 'Error creating account');
-          }
-        } catch (error) {
-          toast.error("Error creating account");
+        } else {
+          toast.error(result?.message || "Error creating account");
         }
-      });
-    };
+      } catch (error) {
+        toast.error("Something went wrong. Try again.");
+      }
+    });
+  };
 
 
   return (

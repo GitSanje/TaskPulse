@@ -42,7 +42,7 @@ export default function Home() {
                     alt="Task Management Dashboard"
                     className="aspect-video object-cover w-full"
                     height="310"
-                    src="/placeholder.svg?height=620&width=1100"
+                    src="https://as1.ftcdn.net/v2/jpg/11/11/03/44/1000_F_1111034434_PsWS3xHP2h2fHKD1uysYJfp5560fRfrO.jpg"
                     width="550"
                   />
                 </div>

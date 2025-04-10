@@ -47,10 +47,10 @@ export default function Navbar() {
 
   return (
     <header className="w-full border-b bg-white">
-      <div className="container flex h-16 items-center px-4 md:px-6">
-        <Link to="/" className="flex items-center gap-2">
+      <div className=" flex h-16 items-center px-4 md:px-6">
+        <Link to="/" className="flex items-center gap-2 text-indigo-700">
           <ListTodoIcon className="h-6 w-6" />
-          <span className="text-lg font-bold">TaskFlow</span>
+          <span className="text-lg font-bold ">TaskPulse</span>
         </Link>
         <nav className="ml-auto hidden gap-6 md:flex">
           <Link to="/features" className="text-sm font-medium hover:underline underline-offset-4">

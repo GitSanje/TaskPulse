@@ -199,7 +199,7 @@ const getUserFromToken = asyncHandler( async(req, res) => {
   return res.status(200).json({
     status: true,
     data: {
-      id: userData.userId,
+      userId: userData.userId,
       username: userData.username,
       email: userData.email,
       profile_url: userData.profile_url

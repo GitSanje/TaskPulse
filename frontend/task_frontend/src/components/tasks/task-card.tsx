@@ -2,7 +2,7 @@
 
 import { useDrag } from "react-dnd";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Clock, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Calendar, Clock, Loader2, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import {
   DropdownMenu,
@@ -14,7 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { TaskCardProps } from "@/types";
 
-export default function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
+export default function TaskCard({ task, onEdit, onDelete,isDeleting  }: TaskCardProps) {
   const [{ isDragging }, drag] = useDrag({
     type: "task",
     item: { id: task.id },
@@ -52,11 +52,17 @@ export default function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
   return (
     <Card
       ref={drag}
-      className={`cursor-grab ${
+      className={`cursor-grab relative  ${
         isDragging ? "opacity-50" : "opacity-100"
+        
       } transition-opacity`}
     >
-      <CardContent className="p-4">
+      { isDeleting && (
+        <div className="absolute inset-0 z-20 bg-white/80 flex items-center justify-center rounded-lg">
+          <Loader2 className="w-5 h-5 animate-spin text-primary" />
+        </div>
+      )}
+      <CardContent className={`p-4 space-y-2 ${isDeleting ? "opacity-50" : ""}`}>
         <div className="flex justify-between items-start mb-2">
           <h4 className="font-medium text-sm uppercase">{task.title}</h4>
           <DropdownMenu>

@@ -10,7 +10,7 @@ interface PrivateRouteProps {
 export default function PrivateRoute({ children }: PrivateRouteProps) {
   const user = useAppSelector((state) => state.session.user)
 //   const location = useLocation()
-  console.log(user,'calling from private');
+
   //state={{ from: location }} replace
   
   if (!user) {

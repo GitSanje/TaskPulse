@@ -54,10 +54,12 @@ import { addTask } from "@/actions/task";
 import { toast } from "sonner";
 import { data } from "react-router-dom";
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
+import { fetchUserTasks, invalidateCache } from "@/store/taskSlice";
+import { useSession } from "@/hooks/useSession";
 
 export default function TaskForm({ onCancel, initialData }: TaskFormProps) {
-  const { session } = useGloabalContext();
-  useAxiosPrivate() // Initialize axios private instance
+  const { user } = useSession();
+  useAxiosPrivate(); // Initialize axios private instance
   const [isPending, startTransition] = useTransition();
   const dispatch = useAppDispatch();
   const persistedFormData = useAppSelector((state) => state.form.formData);
@@ -66,9 +68,13 @@ export default function TaskForm({ onCancel, initialData }: TaskFormProps) {
   // Determine which data to use as default values
   const defaultValues =
     isDirty && !initialData
-      ? {...persistedFormData, user_id: session.data.id, due_date: new Date(persistedFormData.due_date!)}
-      : { 
-          user_id: session.data.id,
+      ? {
+          ...persistedFormData,
+          user_id: user?.data.userId,
+          due_date: new Date(persistedFormData.due_date!),
+        }
+      : {
+          user_id: user?.data.userId,
           title: initialData?.title || "",
           description: initialData?.description || "",
           status: initialData?.status || "pending",
@@ -103,11 +109,9 @@ export default function TaskForm({ onCancel, initialData }: TaskFormProps) {
   };
 
   const onFormSubmit = (data: taskFormData) => {
-   
     startTransition(async () => {
       try {
-     
-        const finalData = {...data, user_id:session.data.id as number}
+        const finalData = { ...data, user_id: user?.data.userId as number };
         // Call addtask server function
         const result = await addTask(finalData);
         if (result?.success) {
@@ -116,12 +120,12 @@ export default function TaskForm({ onCancel, initialData }: TaskFormProps) {
           setTimeout(() => {
             // Reset the form in Redux after successful submission
             dispatch(resetForm());
+            dispatch(invalidateCache())
+            dispatch(fetchUserTasks(user?.data.userId));
             handleCancel();
           }, 2000);
         } else {
-         
-          
-          toast.error(result?.message );
+          toast.error(result?.message);
         }
       } catch (error) {
         console.log(error);
@@ -129,8 +133,8 @@ export default function TaskForm({ onCancel, initialData }: TaskFormProps) {
       }
     });
   };
-  
-  // uncomment and put (onError) on handleSubmit to inspect the errors 
+
+  // uncomment and put (onError) on handleSubmit to inspect the errors
   // const onError: SubmitErrorHandler<taskFormData> = (errors) => console.log(errors)
 
   const handleCancel = () => {
@@ -292,7 +296,7 @@ export default function TaskForm({ onCancel, initialData }: TaskFormProps) {
           <Button
             type="submit"
             className="bg-black text-white hover:bg-gray-800 "
-            disabled={!session?.data.id || isPending}
+            disabled={!user?.data.userId || isPending}
           >
             {isPending ? (
               <Loader

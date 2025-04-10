@@ -10,7 +10,7 @@ import taskReducer from "./taskSlice";
 const taskPersistConfig = {
   key: "tasks",
   storage,
-  whitelist: ["tasks"] 
+  whitelist: ["tasks","lastFetched"]  // persists on the store
 };
 
 

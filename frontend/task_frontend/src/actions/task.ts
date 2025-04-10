@@ -113,3 +113,27 @@ export const deleteTask = async (id: number) => {
     return { success: false, message: "Unexpected error occurred." };
   }
 };
+
+
+
+export const editTask = async (task: taskFormData) => {
+  try {
+    const response = await axiosPrivate.post(`/api/tasks/edit`, task, {
+      withCredentials: true,
+    });
+
+    if (response.data.status) {
+      return { success: true, message: response.data.message };
+    }
+
+    return { success: false, message: "Failed to edit task." };
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Edit failed.",
+      };
+    }
+    return { success: false, message: "Unexpected error occurred." };
+  }
+};

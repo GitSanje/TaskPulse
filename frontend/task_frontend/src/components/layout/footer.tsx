@@ -6,9 +6,9 @@ export default function Footer() {
     <footer className="w-full border-t bg-white">
       <div className="container grid gap-8 px-4 py-10 md:px-6 md:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-4">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2 text-indigo-700">
             <ListTodoIcon className="h-6 w-6" />
-            <span className="text-lg font-bold">TaskFlow</span>
+            <span className="text-lg font-bold">TaskPulse</span>
           </Link>
           <p className="text-sm text-gray-500">Simplify your workflow with our intuitive task management system.</p>
         </div>

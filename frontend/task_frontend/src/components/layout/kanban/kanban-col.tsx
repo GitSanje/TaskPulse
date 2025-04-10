@@ -1,7 +1,8 @@
 import { deleteTask } from "@/actions/task";
 import TaskCard from "@/components/tasks/task-card";
+import { useSession } from "@/hooks/useSession";
 import { useAppDispatch } from "@/store/hooks";
-import { fetchUserTasks } from "@/store/taskSlice";
+import { fetchUserTasks, invalidateCache } from "@/store/taskSlice";
 import { KanbanColumnProps } from "@/types";
 import { useState, useTransition } from "react";
 import { useDrop } from "react-dnd";
@@ -13,35 +14,35 @@ export default function KanbanColumn({
   tasks,
   onDrop,
   onEdit,
-
 }: KanbanColumnProps) {
   const [isPending, startTransition] = useTransition();
   const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
-    const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch();
+  const { user } = useSession();
+  const handleDeleteTask = async (taskId: number) => {
+    setDeletingTaskId(taskId); // show spinner for this card
 
-    const handleDeleteTask = async (taskId: number) => {
-      setDeletingTaskId(taskId); // show spinner for this card
-    
-      startTransition(async () => {
-        try {
-          const result = await deleteTask(taskId);
-          if (result?.success) {
-            toast.success(result.message);
-            setTimeout(() => {
-              dispatch(fetchUserTasks(session?.user.id)); // or session.data.id if using next-auth
-            }, 1000);
-          } else {
-            toast.error(result?.message);
-          }
-        } catch (error) {
-          console.error(error);
-          toast.error("Error deleting task");
-        } finally {
-          setDeletingTaskId(null); // reset spinner
+    startTransition(async () => {
+      try {
+        const result = await deleteTask(taskId);
+        if (result?.success) {
+          toast.success(result.message);
+          setTimeout(() => {
+            dispatch(invalidateCache());
+            dispatch(fetchUserTasks(user?.data.userId));
+          }, 1000);
+        } else {
+          toast.error(result?.message);
         }
-      });
-    };
-    
+      } catch (error) {
+        console.error(error);
+        toast.error("Error deleting task");
+      } finally {
+        setDeletingTaskId(null); // reset spinner
+      }
+    });
+  };
+
   //When you call useDrop, it registers your component as a drop target with the Dnd backend
   const [{ isOver }, drop] = useDrop({
     //What types of draggable items this target can accept.
@@ -72,7 +73,7 @@ export default function KanbanColumn({
 
   return (
     <div
-        ref={drop}
+      ref={drop}
       className={`rounded-lg p-4 ${getColumnColor()} ${
         isOver ? "ring-2 ring-primary ring-opacity-50" : ""
       } transition-all`}
