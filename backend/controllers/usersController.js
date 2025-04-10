@@ -130,7 +130,7 @@ const loginUser = asyncHandler(async (req, res) => {
 const logoutUser = (req, res) => {
   res.clearCookie("accessToken");
   res.clearCookie("refreshToken");
-  return res.status(200).json({ message: "Logged out successfully" });
+  return res.status(201).json({ status:true, message: "Logged out successfully!" });
 };
 
 /**

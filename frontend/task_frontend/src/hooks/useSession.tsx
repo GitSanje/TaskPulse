@@ -4,14 +4,14 @@ import { UserPayload } from "@/types";
 import axios from "axios";
 import { useCallback, useEffect } from "react";
 import { axiosPrivate } from "./axios";
-
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export const useSession = () => {
-  
-  const dispatch = useAppDispatch()
-  const { user, loading, initialized } = useAppSelector((state) => state.session)
-
-
+  const dispatch = useAppDispatch();
+  const { user, loading, initialized } = useAppSelector(
+    (state) => state.session
+  );
 
   const fetchSession = useCallback(async () => {
     try {
@@ -34,35 +34,37 @@ export const useSession = () => {
     }
   }, [dispatch]);
 
-  
   useEffect(() => {
     if (!initialized) {
       fetchSession();
     }
   }, [fetchSession, initialized]);
-    return { user, loading ,fetchSession};
-
-}
+  return { user, loading, fetchSession };
+};
 
 // Add a logout function that can be used anywhere in the app
 export const useLogout = () => {
-  const dispatch = useAppDispatch()
-
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const logout = async () => {
     try {
       // Call your logout API endpoint
-      const res = await axiosPrivate.post("api/users/logout",{
-        withCredentials: true, // to include cookies
-      })
+      const res = await axiosPrivate.post("api/users/logout", null, {
+        withCredentials: true,
+      });      
 
-      if (res.data.success) {
-        // Clear the user from Redux
-        dispatch(setUser(null))
+      if (res.data) {
+        setTimeout(() => {
+          // Clear the user from Redux
+          dispatch(setUser(null));
+          toast.success("Logged out successfully!");
+          navigate("/");
+        }, 2000);
       }
     } catch (err) {
-      console.error("Logout failed", err)
+      console.error("Logout failed", err);
     }
-  }
+  };
 
-  return { logout }
-}
+  return { logout };
+};

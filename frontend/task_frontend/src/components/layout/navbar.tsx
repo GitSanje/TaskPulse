@@ -15,6 +15,8 @@ import {
 import { useAppDispatch, useAppSelector } from "@/store/hooks"
 import { setUser } from "@/store/sessionSlice"
 import { toast } from "sonner"
+import { useLogout } from "@/hooks/useSession"
+import { axiosPrivate } from "@/hooks/axios"
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -25,17 +27,17 @@ export default function Navbar() {
   const handleLogout = async () => {
     try {
       // Call your logout API endpoint
-      const res = await fetch("http://localhost:3500/api/users/logout", {
-        method: "POST",
-        credentials: "include",
-      })
-
-      if (res.ok) {
+     const res = await axiosPrivate.post("api/users/logout", null, {
+            withCredentials: true,
+          });      
+    console.log(res);
+    
+      if (res.status === 200) {
     
         setTimeout(() => {
               // Clear the user from Redux
         dispatch(setUser(null))
-          toast.success("logging out")
+          toast.success("Logged out successfully!")
           navigate("/")
         },2000)
      
@@ -44,6 +46,8 @@ export default function Navbar() {
       console.error("Logout failed", err)
     }
   }
+
+
 
   return (
     <header className="w-full border-b bg-white">
