@@ -3,16 +3,19 @@ import { setUser } from "@/store/sessionSlice";
 import { UserPayload } from "@/types";
 import axios from "axios";
 import { useCallback, useEffect } from "react";
-import { axios2 } from "./axios";
+import { axiosPrivate } from "./axios";
+
 
 export const useSession = () => {
   
   const dispatch = useAppDispatch()
   const { user, loading, initialized } = useAppSelector((state) => state.session)
 
+
+
   const fetchSession = useCallback(async () => {
     try {
-      const res = await axios2.get("api/users/me", {
+      const res = await axiosPrivate.get("api/users/me", {
         withCredentials: true, // to include cookies
       });
 
@@ -48,7 +51,7 @@ export const useLogout = () => {
   const logout = async () => {
     try {
       // Call your logout API endpoint
-      const res = await axios2.post("api/users/logout",{
+      const res = await axiosPrivate.post("api/users/logout",{
         withCredentials: true, // to include cookies
       })
 
